@@ -1,0 +1,3 @@
+rm -r -f pic
+mkdir pic
+sudo chmod 777 pic

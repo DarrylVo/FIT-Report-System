@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+        <meta charset="UTF-8">
+	<script src = "src/jquery-3.0.0.min.js"></script>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<link rel="stylesheet" href="css/leaflet.css" />
+</head>
+
+<body onload = 	"showTable()">
+        <div id="mapid"></div>
+
+        <p><b> Marker Id:</b> </p>
+        <p id = "markerId" > </p>
+
+        
+        <p><b> Latitude: </b> </p>
+        <p id = "markerLat" > </p>
+
+
+        <p><b> Longitude: </b> </p>
+        <p id = "markerLong" > </p>
+
+        <p><b> Title: </b> </p>
+        <p id = "markerTitle" > </p>
+
+        <p><b> Text:</b> </p>
+        <p id = "markerText" > </p>
+
+	<script src = "src/leaflet.js"> </script>
+	
+        <button onclick = "getReports()"> Get Reports </button><br>
+        <button onclick = "createMarkers()"> Create Markers </button><br><br><br>
+
+        <button onclick="randomReport()"> Save random report </button></br>	
+        <button onclick ="clearTable()"> Clear Database Table </button><br><br><br>
+    <!--    <button onclick = "createCsv()"> Create Csv File </button><br> --!>
+        <p> Report Title: <p>
+        <input id="title"></input>
+        <p> Report Text: <p>
+        <textarea id = "text" rows = "6" cols = "50"> </textarea>
+	<p id="demo"></p>
+
+        <input type='file' />
+        <img id="myImg" src="#" alt="your image" width = 50 height = 50 />
+
+	<button onclick="saveReport()">Save report</button>
+        <p id = "print"> </p>
+        <p><b> Database printout here </b> </p>
+        <p id = "table"> </p>
+        	
+	
+</body>
+
+<script src = "src/gps.js">  </script>
+
+
+
+</html>
