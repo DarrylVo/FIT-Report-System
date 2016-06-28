@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+   <meta charset="UTF-8">
+   <script src = "src/jquery-3.0.0.min.js"></script>
+</head>
+
+
+<body>
+   <button onclick="randomReport()"> Save random report </button></br>	
+   <button onclick ="clearTable()"> Clear Database Table </button><br><br><br>
+
+   <p> Name:</p>
+   <input id = "fag"> </input>
+   
+   <p> Report Title: <p>
+   <input id="title"></input>
+    
+   <p> Report Text: <p>
+   <textarea id = "text" rows = "6" cols = "50"> </textarea>
+
+   <input type='file' />
+   <img id="myImg" src="#" alt="your image" width = 50 height = 50 />
+      
+   <br>
+   <button onclick="saveReport()">Save report</button>
+   <p id = "print"></p>	
+	
+</body>
+
+<script src = "src/gps.js">  </script>
+<script src = "src/leaflet.js"> </script>
+
+
+
+
+</html>
