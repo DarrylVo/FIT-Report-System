@@ -32,7 +32,6 @@ function getReports() {
           
            var coord_json = jQuery.parseJSON(data);
            for(var i = 0; i < coord_json.length; i ++) {
-               alert(coord_json[i].gps_timestamp);
               var rep = {"id" : parseInt(coord_json[i].gps_id),
                          "lat" : parseFloat(coord_json[i].gps_lat), 
                          "long" : parseFloat(coord_json[i].gps_long),
@@ -45,7 +44,6 @@ function getReports() {
               if(!hasReport(rep.id))
                  reports.push(rep);  
           }
-          console.log(reports); 
        }  
        })
 
@@ -62,8 +60,6 @@ function createMarkers() {
    //probably going to get a better way to show metadata than a popup 
    //over the marker. 
    //   marker.bindPopup(reports[i].text).openPopup();
-         console.log(reports[i].text); 
-         console.log(reports[i].id);        
 
       }
    }

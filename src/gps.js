@@ -1,29 +1,31 @@
 
 //references to html tags
-var x = document.getElementById("demo");
 var table = document.getElementById("table");
 var print = document.getElementById("print");
 var text = document.getElementById("text");
 var title = document.getElementById("title");
 var fag = document.getElementById("fag");
+
+//global var for picture
 var file;
 
 //saves a report- report consists of current gps locaiton, title, 
 // name, text, and picture. ALL is required
-//to do: have the ability for pictures to not be required? unkown behavior if picture
-//not used
+// sends gps coords/text in first POST, which returns the mysql primary key
+// that mysql primary key is then used for the picture name when its uploaded
+//is that bad? no idea
+//TODO: have the ability for pictures to not be required? unkown behavior if picture not used
+//TODO: TEXT/PICTURE VALIDATION
 function saveReport() {
    if (navigator.geolocation) 
       navigator.geolocation.getCurrentPosition(savePosition);
    else  
-      x.innerHTML = "Geolocation is not supported by this browser.";
+      print.innerHTML = "Geolocation is not supported by this browser.";
 }
 
-//gets called by save report to save posistion and do ajax calls to php
+//gets called by saveReport() to send position and text data to server using ajax calls
+//on success will trigger upload function, which sends the picture
 function savePosition(position) {
-   x.innerHTML = "Latitude: " + position.coords.latitude + 
-     "<br>Longitude: " + position.coords.longitude;
-   alert(fag.value);
 
    var report = [position.coords.latitude, position.coords.longitude, title.value, text.value, file.name.split(".")[1], fag.value];
    $.ajax({
@@ -34,14 +36,14 @@ function savePosition(position) {
           upload(file, data);
       }  
    })
-   showTable();	
 }
 
-//saves a "random" report by doing ajax calls
+//sends a randomly located report to the server using ajax calls
+//TODO: add picture random report too
 function randomReport() {
    var la = Math.random() * (185 - 0) + 0;
    var lo = Math.random() * (185 - 0) + 0; 
-   var report = [la, lo, "rando", "lel"];
+   var report = [la, lo, "rando", "lel","kek","lmao"];
    $.ajax({
       type: "POST",
       url: "src/new_gps.php",
@@ -52,6 +54,8 @@ function randomReport() {
    })
 }
 
+//Jquery function call that will listen for picture uploads.
+//TODO: picture validation. make sure only sends pictures!
 $(function () {
     $(":file").change(function () {
         if (this.files && this.files[0]) {
@@ -63,10 +67,13 @@ $(function () {
     });
 });
 
+//shows a thumbnail of the picture before sending it to the server
 function imageIsLoaded(e) {
     $('#myImg').attr('src', e.target.result);
 };
 
+//uploads picture to the server
+//TODO: Picture validation!
 function upload(file, filename) {
 
    var formData = new FormData();

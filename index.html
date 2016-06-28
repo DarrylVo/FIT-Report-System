@@ -22,7 +22,6 @@
         <p><b> Latitude: </b> </p>
         <p id = "markerLat" > </p>
 
-
         <p><b> Longitude: </b> </p>
         <p id = "markerLong" > </p>
 
@@ -40,8 +39,6 @@
         <img id="markerImg" src="" width = 50 height = 50 />
         <br>
 
-	<script src = "src/leaflet.js"> </script>
-	
         <button onclick = "getReports()"> Get Reports </button><br>
         <button onclick = "createMarkers()"> Create Markers </button><br><br><br>
 
@@ -54,20 +51,21 @@
    
         <p> Report Title: <p>
         <input id="title"></input>
+    
         <p> Report Text: <p>
         <textarea id = "text" rows = "6" cols = "50"> </textarea>
-	<p id="demo"></p>
 
         <input type='file' />
         <img id="myImg" src="#" alt="your image" width = 50 height = 50 />
+      
         <br>
 	<button onclick="saveReport()">Save report</button>
-        	
+        <p id = "print"></p>	
 	
 </body>
 
 <script src = "src/gps.js">  </script>
-
+<script src = "src/leaflet.js"> </script>
 
 
 </html>
