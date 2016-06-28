@@ -7,30 +7,12 @@ if($mysqli->connect_errno) {
    exit;
 }
 
-
-if(isset($_REQUEST['coords'])){
-   $coords = $_POST['coords'];
-   $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-       "(gps_lat, gps_long, gps_text) ".
-       "VALUES ".
-       "('$coords[0]', '$coords[1]','write report text here')";
-
-   $result = mysqli_query($mysqli,$sql_q);
-   if(!$result) {
-      printf("insert error\n");
-      exit;
-   }
-   else {
-      printf("insert current gps loc succ\n");
-   }
-   mysqli_free_result($result);
-}
 else if(isset($_REQUEST['report'])){
    $report = $_POST['report'];
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-       "(gps_lat, gps_long, gps_title, gps_text) ".
+       "(gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name) ".
        "VALUES ".
-       "('$report[0]', '$report[1]','$report[2]','$report[3]')";
+       "('$report[0]', '$report[1]','$report[2]','$report[3]','$report[4]', '$report[5]')";
    $result = mysqli_query($mysqli,$sql_q);
    if(!$result) {
       printf("report error\n");
@@ -51,7 +33,7 @@ else if(isset($_REQUEST['report'])){
 
 else if(isset($_REQUEST['clear'])){
   
-   $sql_q = "DELETE FROM GPSCOORDS_TB1";
+   $sql_q = "TRUNCATE TABLE GPSCOORDS_TB1";
    $result = mysqli_query($mysqli,$sql_q);
    if(!$result ) {
       printf("delete error\n");
@@ -65,7 +47,7 @@ else if(isset($_REQUEST['clear'])){
 
 else if(isset($_REQUEST['show'])){
    printf("SHOW ME DA MONEY\n");
-   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text
+   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name
         FROM GPSCOORDS_TB1';
  //  mysql_select_db('GPSCOORDS');
    $retval = mysqli_query( $mysqli, $sql_q);
@@ -80,6 +62,8 @@ else if(isset($_REQUEST['show'])){
          "GPS LONG: {$row['gps_long']} <br> ".
          "GPS TITLE: {$row['gps_title']} <br> ".
          "GPS TEXT: {$row['gps_text']} <br> ".
+         "GPS EXT: {$row['gps_ext']} <br> ".
+         "GPS NAME: {$row['gps_name']} <br> ".
          "--------------------------------<br>";
    }
    mysqli_free_result($result);
@@ -88,7 +72,7 @@ else if(isset($_REQUEST['show'])){
 else if(isset($_REQUEST['getreports'])){
 
    $arr = array();
-   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text
+   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name, gps_timestamp  
         FROM GPSCOORDS_TB1';
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
@@ -101,10 +85,6 @@ else if(isset($_REQUEST['getreports'])){
    echo json_encode($arr);
    mysqli_free_result($retval); 
 }
-
-
-
-
 
 mysqli_close($mysqli);
 ?>

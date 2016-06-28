@@ -10,12 +10,14 @@
 	<link rel="stylesheet" href="css/leaflet.css" />
 </head>
 
-<body onload = 	"showTable()">
+<body>
         <div id="mapid"></div>
 
         <p><b> Marker Id:</b> </p>
         <p id = "markerId" > </p>
 
+        <p><b> Name:</b> </p>
+        <p id = "markerName" > </p>
         
         <p><b> Latitude: </b> </p>
         <p id = "markerLat" > </p>
@@ -24,11 +26,19 @@
         <p><b> Longitude: </b> </p>
         <p id = "markerLong" > </p>
 
+        <p><b> Timestamp:: </b> </p>
+        <p id = "markerTimeStamp" > </p>
+
         <p><b> Title: </b> </p>
         <p id = "markerTitle" > </p>
 
         <p><b> Text:</b> </p>
         <p id = "markerText" > </p>
+
+        <p><b> Image::</b> </p>
+
+        <img id="markerImg" src="" width = 50 height = 50 />
+        <br>
 
 	<script src = "src/leaflet.js"> </script>
 	
@@ -37,7 +47,11 @@
 
         <button onclick="randomReport()"> Save random report </button></br>	
         <button onclick ="clearTable()"> Clear Database Table </button><br><br><br>
-    <!--    <button onclick = "createCsv()"> Create Csv File </button><br> --!>
+
+
+        <p> Name:</p>
+        <input id = "fag"> </input>
+   
         <p> Report Title: <p>
         <input id="title"></input>
         <p> Report Text: <p>
@@ -46,11 +60,8 @@
 
         <input type='file' />
         <img id="myImg" src="#" alt="your image" width = 50 height = 50 />
-
+        <br>
 	<button onclick="saveReport()">Save report</button>
-        <p id = "print"> </p>
-        <p><b> Database printout here </b> </p>
-        <p id = "table"> </p>
         	
 	
 </body>

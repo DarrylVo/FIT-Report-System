@@ -8,7 +8,8 @@ var markerLat = document.getElementById("markerLat");
 var markerLong = document.getElementById("markerLong");
 var markerTitle = document.getElementById("markerTitle");
 var markerText = document.getElementById("markerText");
-
+var markerImg = document.getElementById("markerImg");
+var markerTimeStamp = document.getElementById("markerTimeStamp");
 
 //map stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -25,17 +26,21 @@ function getReports() {
         var getreports = "getreports";
 	$.ajax({
         type: "POST",
-        url: "new_gps.php",
+        url: "src/new_gps.php",
         data:{ getreports : getreports }, 
         success: function(data) {
           
            var coord_json = jQuery.parseJSON(data);
            for(var i = 0; i < coord_json.length; i ++) {
+               alert(coord_json[i].gps_timestamp);
               var rep = {"id" : parseInt(coord_json[i].gps_id),
                          "lat" : parseFloat(coord_json[i].gps_lat), 
                          "long" : parseFloat(coord_json[i].gps_long),
                          "title" : coord_json[i].gps_title,  
-                         "text" : coord_json[i].gps_text  }; 
+                         "text" : coord_json[i].gps_text,  
+                         "ext" : coord_json[i].gps_ext,
+                         "name" : coord_json[i].gps_name,
+                         "timestamp" : coord_json[i].gps_timestamp}; 
               console.log(rep);
               if(!hasReport(rep.id))
                  reports.push(rep);  
@@ -75,6 +80,9 @@ function markerClick(e) {
    markerLong.innerHTML = report.long;
    markerTitle.innerHTML = report.title;
    markerText.innerHTML = report.text;
+   markerName.innerHTML = report.name;
+   markerImg.src = "pic/" + id + "." + report.ext;
+   markerTimeStamp.innerHTML = report.timestamp
 }
 
 //finds report in reports array by id
