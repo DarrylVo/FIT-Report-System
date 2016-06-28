@@ -24,7 +24,8 @@ function saveReport() {
 }
 
 //gets called by saveReport() to send position and text data to server using ajax calls
-//on success will trigger upload function, which sends the picture
+//on success will recieve primary key from mysql database, which is used as the picture's name, which is then
+//uploaded
 function savePosition(position) {
 
    var report = [position.coords.latitude, position.coords.longitude, title.value, text.value, file.name.split(".")[1], fag.value];
@@ -49,7 +50,7 @@ function randomReport() {
       url: "src/new_gps.php",
       data:{ report : report }, 
       success: function(data) {
-         print.innerHTML = data;
+         print.innerHTML = "Random report saved!";
       }  
    })
 }
@@ -85,6 +86,7 @@ function upload(file, filename) {
       processData: false,  // tell jQuery not to process the data
       contentType: false,  // tell jQuery not to set contentType
       success : function(data) {
+         print.innerHTML("report saved");
       }
    });
 

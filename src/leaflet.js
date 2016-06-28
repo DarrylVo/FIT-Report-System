@@ -3,6 +3,7 @@
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
 var reports = [];
 var markers = [];
+var print = document.getElementById("print");
 var markerId = document.getElementById("markerId");
 var markerLat = document.getElementById("markerLat");
 var markerLong = document.getElementById("markerLong");
@@ -40,10 +41,10 @@ function getReports() {
                          "ext" : coord_json[i].gps_ext,
                          "name" : coord_json[i].gps_name,
                          "timestamp" : coord_json[i].gps_timestamp}; 
-              console.log(rep);
               if(!hasReport(rep.id))
                  reports.push(rep);  
-          }
+           }
+           print.innerHTML = "got reports from mysql";
        }  
        })
 
@@ -63,6 +64,7 @@ function createMarkers() {
 
       }
    }
+   print.innerHTML = "created map markers";
 
 }
 
@@ -79,6 +81,7 @@ function markerClick(e) {
    markerName.innerHTML = report.name;
    markerImg.src = "pic/" + id + "." + report.ext;
    markerTimeStamp.innerHTML = report.timestamp
+   print.innerHTML = "marker clicked on!";
 }
 
 //finds report in reports array by id
