@@ -27,7 +27,7 @@ function getReports() {
         var getreports = "getreports";
 	$.ajax({
         type: "POST",
-        url: "src/new_gps.php",
+        url: "src/report.php",
         data:{ getreports : getreports }, 
         success: function(data) {
           

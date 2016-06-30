@@ -1,5 +1,4 @@
 <?php
-
 //TODO: I REALLY NEED MYSQL SANITATION
 
 //creates mysqli connection object...   
@@ -11,16 +10,25 @@ if($mysqli->connect_errno) {
    exit;
 }
 
-//if POST is "report", insert report (only gps coords and text) into mysql
-//returns the mysql primary key to use for picture upload by doing second mysql query, 
-//since picture upload happens after the text/gps coordinates of the reports are uploaded.
-//is this bad? idk
-else if(isset($_REQUEST['report'])){
-   $report = $_POST['report'];
+
+//NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE
+//does the report text and the picture in one go!
+//the ajax post from report.js is only called after validation!
+//basically stores report info (not including picture),
+//then retrives the primary key for that mysql record to use as the
+//picture name
+
+// DO i need further validation? *scratches head
+else if(isset($_REQUEST['name'])){
+   $coords = $_POST['coords'];
+   $title = $_POST['title'];
+   $text = $_POST['text'];
+   $name = $_POST['name'];
+   $ext = "kek";
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
        "(gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name) ".
        "VALUES ".
-       "('$report[0]', '$report[1]','$report[2]','$report[3]','$report[4]', '$report[5]')";
+       "('$coords[0]', '$coords[1]','$title','$text','$ext','$name')";
    $result = mysqli_query($mysqli,$sql_q);
    if(!$result) {
       printf("report insert error\n");
@@ -36,13 +44,33 @@ else if(isset($_REQUEST['report'])){
       exit;
    }
    
+
    $record = mysqli_fetch_array($result2, MYSQL_ASSOC);
 
-   printf("%d",$record['gps_id']) ;
 
    mysqli_free_result($result);
    mysqli_free_result($result2);
+
+
+
+
+
+        foreach($_FILES as $file) { 
+            $n = $file['name']; 
+            $s = $file['size']; 
+            if (!$n) continue; 
+           $fileContent = file_get_contents($file['tmp_name']);
+             $test = fopen("../pic/".explode(".",$n)[1],"x");
+              if(!$test)
+                 echo "../pic/".$record['gps_id'].".".explode(".",$n)[1];
+               else
+                 printf("writin file\n");
+             fwrite($test, $fileContent);
+              fclose($test);
+        }
 }
+
+
 
 //on POST from js, clears the entire mysql db:w
 
