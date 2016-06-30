@@ -1,8 +1,6 @@
 
 
-//global var for picture
-var file;
-
+//global var for coordinates
 var coords = new Array(2);
 
 
@@ -23,41 +21,19 @@ function randomReport() {
 }
 
 
-//shows a thumbnail of the picture before sending it to the server
+//shows a thumbnail of the picture 
 function imageIsLoaded(e) {
     $('#myImg').attr('src', e.target.result);
 };
 
-//uploads picture to the server
-//TODO: Picture validation!
-function upload(file, filename) {
 
-   var formData = new FormData();
-   formData.append('file', file, filename + "." + file.name.split(".")[1] );
-   $.ajax({
-      url : 'src/report_upload.php',
-      type : 'POST',
-      data : formData,
-      processData: false,  // tell jQuery not to process the data
-      contentType: false,  // tell jQuery not to set contentType
-      success : function(data) {
-         print.innerHTML = "report saved";
-      }
-   });
-
-}
-
-//Jquery function call that will listen for picture uploads
-//upates the global "file" to the uploaded file. also updates thumbnail
-//DOES NOT actually send the picture to the server. upload() does that.
-//TODO: picture validation. make sure only sends pictures!
+//Jquery function call that will listen for picture uploads and then updates thumbnail
 $(function () {
     $(":file").change(function () {
         if (this.files && this.files[0]) {
             var reader = new FileReader();
             reader.onload = imageIsLoaded;
             reader.readAsDataURL(this.files[0]);
-            file = this.files[0];
         }
     });
 });
@@ -75,7 +51,7 @@ $("#commentForm").validate({
     
 });
 
-
+//callback function for validation
 function sendForm(form) {
 
      if (navigator.geolocation) 
@@ -100,7 +76,7 @@ function sendForm(form) {
 
 }
 
-
+//callback to save coordinates
 function saveCoords(position) {
    coords[0] = position.coords.latitude;
    coords[1] = position.coords.longitude;

@@ -13,18 +13,18 @@ if($mysqli->connect_errno) {
 
 //NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE
 //does the report text and the picture in one go!
-//the ajax post from report.js is only called after validation!
-//basically stores report info (not including picture),
-//then retrives the primary key for that mysql record to use as the
-//picture name
+//the trigger to this ajax response is only after validation!
+//stores the text/coords into mysql, then gets the primary key of that new mysql
+//record to use as the picturename. makes the pics simple to track
 
 // DO i need further validation? *scratches head
+// oh yeah, mysql sanitation kek
 else if(isset($_REQUEST['name'])){
    $coords = $_POST['coords'];
    $title = $_POST['title'];
    $text = $_POST['text'];
    $name = $_POST['name'];
-   $ext = "kek";
+   $ext = end(explode(".",$_FILES['pic']['name']));
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
        "(gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name) ".
        "VALUES ".
@@ -44,30 +44,23 @@ else if(isset($_REQUEST['name'])){
       exit;
    }
    
-
    $record = mysqli_fetch_array($result2, MYSQL_ASSOC);
-
 
    mysqli_free_result($result);
    mysqli_free_result($result2);
 
-
-
-
-
-        foreach($_FILES as $file) { 
-            $n = $file['name']; 
-            $s = $file['size']; 
-            if (!$n) continue; 
-           $fileContent = file_get_contents($file['tmp_name']);
-             $test = fopen("../pic/".explode(".",$n)[1],"x");
-              if(!$test)
-                 echo "../pic/".$record['gps_id'].".".explode(".",$n)[1];
-               else
-                 printf("writin file\n");
-             fwrite($test, $fileContent);
-              fclose($test);
-        }
+   $file = $_FILES['pic']; 
+   $n = $file['name']; 
+   $s = $file['size']; 
+   $fileContent = file_get_contents($file['tmp_name']);
+   $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
+   if(!$test)
+      echo "couldnt open";
+   else
+      printf("writin file\n");
+   fwrite($test, $fileContent);
+   fclose($test);
+        
 }
 
 
