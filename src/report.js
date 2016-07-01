@@ -9,11 +9,11 @@ var coords = new Array(2);
 function randomReport() {
    var la = Math.random() * (185 - 0) + 0;
    var lo = Math.random() * (185 - 0) + 0; 
-   var report = [la, lo, "rando", "lel","kek","lmao"];
+   var rand = [la, lo, "rando", "lel","kek","lmao"];
    $.ajax({
       type: "POST",
       url: "src/report.php",
-      data:{ report : report }, 
+      data:{ rand : rand }, 
       success: function(data) {
          print.innerHTML = "Random report saved!";
       }  
@@ -60,7 +60,6 @@ function sendForm(form) {
         alert("no gps support. update yo browser");
 
       } 
-    alert(coords[0]); 
    $(form).ajaxSubmit({
         url : 'src/report.php',
         type : 'POST',
@@ -68,7 +67,6 @@ function sendForm(form) {
         processData: false,  // tell jQuery not to process the data
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
-           alert(data);
           location.reload(true);
         }
      });   

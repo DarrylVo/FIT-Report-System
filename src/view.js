@@ -4,7 +4,6 @@ var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
 var reports = [];
 var markers = [];
 var print = document.getElementById("print");
-
 //map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -39,7 +38,6 @@ function getReports() {
               var rep = {"id" : parseInt(coord_json[i].gps_id),
                          "lat" : parseFloat(coord_json[i].gps_lat), 
                          "long" : parseFloat(coord_json[i].gps_long),
-                         "title" : coord_json[i].gps_title,  
                          "text" : coord_json[i].gps_text,  
                          "ext" : coord_json[i].gps_ext,
                          "name" : coord_json[i].gps_name,
@@ -51,7 +49,27 @@ function getReports() {
        }  
        })
 
-}   
+} 
+
+//shows reports created from getReports() by doing a jquery insert element
+function showReports() {
+
+   for(var i = 0; i < reports.length; i++) {
+      var name = $("<p></p>").text("Name:."+ reports[i].name);
+      var text = $("<p></p>").text("Text:."+ reports[i].text);
+      $(report).append(name);
+      $(report).append(text);
+    
+   }
+
+
+}
+
+function removeReport() {
+   $(report).children().eq(0).remove();
+}
+
+  
 //create markers on the map from the report array
 //keeps track of markers created using the mysql id in the markers array
 //will not create already created markers
@@ -71,13 +89,15 @@ function createMarkers() {
 
 //binds popup containing report data to marker!
 function markerBind(marker, report) {
+   var src = '"pic/' + report.id + "." + report.ext + '"';
    marker.bindPopup("Latitude: " +report.lat +"<br>" 
                     + "Longitude: " + report.long +"<br>"
                     + "Timestamp: " + report.timestamp +"<br>"
                     + "Name: " + report.name + "<br>"
-                    + "Title: " + report.title +"<br>"
                     + "Text: " + report.text +"<br>"
-                    + 'Img: <img width = "50" height = "50" src="pic/' + report.id + "." + report.ext + '"></img><br>' );
+                    +  '<a href = "pic/' + report.id + "." + report.ext + '" data-lightbox = "image1" >' +   ' <img width = "50" height = "50" src=' + src +  '></img><br>'    +   '</a>'
+                     
+                    );
 
 }
 

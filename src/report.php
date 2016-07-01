@@ -1,6 +1,8 @@
 <?php
 //TODO: I REALLY NEED MYSQL SANITATION
 
+//how this works php script works- on ajax posts from either view.js or report.js it will do mysql queries
+
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 
@@ -11,24 +13,26 @@ if($mysqli->connect_errno) {
 }
 
 
-//NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE
+//NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE AND PICTURE SAVING
 //does the report text and the picture in one go!
-//the trigger to this ajax response is only after validation!
-//stores the text/coords into mysql, then gets the primary key of that new mysql
+//the trigger to this ajax POST response is only after validation!
+//stores the text/coords into mysql, then gets the primary key of that new mysql to
+//use as the name of the uploaded photo
+//file extension is also saved in the mysql db so we can figure out the the the corresponding photo
+// i.e. for mysql record with a primary key of "1" and an extension of "png" the corresponding file is "1.png"
 //record to use as the picturename. makes the pics simple to track
 
 // DO i need further validation? *scratches head
 // oh yeah, mysql sanitation kek
 else if(isset($_REQUEST['name'])){
    $coords = $_POST['coords'];
-   $title = $_POST['title'];
    $text = $_POST['text'];
    $name = $_POST['name'];
    $ext = end(explode(".",$_FILES['pic']['name']));
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-       "(gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name) ".
+       "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
        "VALUES ".
-       "('$coords[0]', '$coords[1]','$title','$text','$ext','$name')";
+       "('$coords[0]', '$coords[1]','$text','$ext','$name')";
    $result = mysqli_query($mysqli,$sql_q);
    if(!$result) {
       printf("report insert error\n");
@@ -63,8 +67,22 @@ else if(isset($_REQUEST['name'])){
         
 }
 
+// on this POST, saves the random report
+else if(isset($_REQUEST['rand'])){
+   $rand = $_POST['rand'];
+   $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+       "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+       "VALUES ".
+       "('$rand[0]', '$rand[1]','$rand[2]','$rand[3]','$rand[4]')";
+   $result = mysqli_query($mysqli,$sql_q);
+   if(!$result) {
+      printf("report insert error\n");
+      exit;
+   }
+   mysqli_free_result($result);
 
 
+}
 //on POST from js, clears the entire mysql db:w
 
 else if(isset($_REQUEST['clear'])){
@@ -81,37 +99,11 @@ else if(isset($_REQUEST['clear'])){
    mysqli_free_result($result);
 }
 
-
-//on correct POST, shows result of mysql database
-else if(isset($_REQUEST['show'])){
-   printf("SHOW ME DA MONEY\n");
-   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name
-        FROM GPSCOORDS_TB1';
- //  mysql_select_db('GPSCOORDS');
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
-      printf("retreieve error\n");
-      exit;
-   }
-   
-   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC)) {
-    echo "GPS ID :{$row['gps_id']}  <br> ".
-         "GPS LAT: {$row ['gps_lat']} <br> ".
-         "GPS LONG: {$row['gps_long']} <br> ".
-         "GPS TITLE: {$row['gps_title']} <br> ".
-         "GPS TEXT: {$row['gps_text']} <br> ".
-         "GPS EXT: {$row['gps_ext']} <br> ".
-         "GPS NAME: {$row['gps_name']} <br> ".
-         "--------------------------------<br>";
-   }
-   mysqli_free_result($result);
-}
-
 //on this POST, gets all the reports out of the mysql db
 else if(isset($_REQUEST['getreports'])){
 
    $arr = array();
-   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_title, gps_text, gps_ext, gps_name, gps_timestamp  
+   $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp  
         FROM GPSCOORDS_TB1';
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
