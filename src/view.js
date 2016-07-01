@@ -4,21 +4,24 @@ var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
 var reports = [];
 var markers = [];
 var print = document.getElementById("print");
-var markerId = document.getElementById("markerId");
-var markerLat = document.getElementById("markerLat");
-var markerLong = document.getElementById("markerLong");
-var markerTitle = document.getElementById("markerTitle");
-var markerText = document.getElementById("markerText");
-var markerImg = document.getElementById("markerImg");
-var markerTimeStamp = document.getElementById("markerTimeStamp");
 
-//map stuff
+//map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18,
     id: 'rosglue.0fng9eaj',
     accessToken: 'pk.eyJ1Ijoicm9zZ2x1ZSIsImEiOiJjaXBzbDkzdXcwM3c1ZmttMjhyNzR1bmVxIn0.g45wbGBB5SprrAES2ju06Q'
 }).addTo(mymap);
+
+//map callback stuff
+mymap.on('popupopen', function(centerMarker) {
+        var cM = mymap.project(centerMarker.popup._latlng);
+        cM.y -= centerMarker.popup._container.clientHeight/2
+        mymap.setView(centerMarker.popup._latlng,15, {animate: true, 
+                                                      pan: {duration : 0.25, easeLinearity : 0.25  }   });
+    });
+
+
 
 // does ajax call/return to get the reports from the mysql db
 // if the report already exists (by gps_id) it will not push it on the array
@@ -56,33 +59,28 @@ function createMarkers() {
    for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
          markers.push(reports[i].id);
-         var marker = L.marker([reports[i].lat, reports[i].long],{title:reports[i].id }).addTo(mymap).on('click',markerClick);
+         var marker = L.marker([reports[i].lat, reports[i].long],{title:reports[i].id }).addTo(mymap);
+         markerBind(marker, reports[i]);
          markers.push(reports[i].id);
-   //probably going to get a better way to show metadata than a popup 
-   //over the marker. 
-   //   marker.bindPopup(reports[i].text).openPopup();
-
       }
    }
+
    print.innerHTML = "created map markers";
 
 }
 
-//displays marker data on marker click
-function markerClick(e) {
-   console.log("clicked on marker");
-   var id = e.target.options.title;
-   var report = findReport(id);
-   markerId.innerHTML = id;
-   markerLat.innerHTML = report.lat;
-   markerLong.innerHTML = report.long;
-   markerTitle.innerHTML = report.title;
-   markerText.innerHTML = report.text;
-   markerName.innerHTML = report.name;
-   markerImg.src = "pic/" + id + "." + report.ext;
-   markerTimeStamp.innerHTML = report.timestamp
-   print.innerHTML = "marker clicked on!";
+//binds popup containing report data to marker!
+function markerBind(marker, report) {
+   marker.bindPopup("Latitude: " +report.lat +"<br>" 
+                    + "Longitude: " + report.long +"<br>"
+                    + "Timestamp: " + report.timestamp +"<br>"
+                    + "Name: " + report.name + "<br>"
+                    + "Title: " + report.title +"<br>"
+                    + "Text: " + report.text +"<br>"
+                    + 'Img: <img width = "50" height = "50" src="pic/' + report.id + "." + report.ext + '"></img><br>' );
+
 }
+
 
 //finds report in reports array by id
 function findReport(id) {
