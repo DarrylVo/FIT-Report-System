@@ -1,0 +1,19 @@
+Hey future intern that is probably going to have to update this software.
+
+TBF I wrote this while i was learning the web stack (front end javascript to the mysql/php stuff), 
+
+so its probably a little messy. my bad. 
+
+basic structure of this web app- view.* files handles the map stuff(creating the map, getting data out of the database,
+displaying the data on the map) report.* files handles actually creating/validating the report, and sending it to the server
+the register.html file is just an extra page to register a name + team id into the db. 
+
+if you migrate this program into a new server, becareful about the mysql table names and columns and stuff
+Hopefully ill have made an install script to do that for you. otherwise you gotta hunt through the code for the names. sorry!
+
+
+This uses jquery, lightbox, leaflet, and maybe some other plugins for jquery i forgot. 
+
+Its a rather simple program, didn't want to get too crazy with stuff like react/angular/w.e.
+
+if you got any questions, email me dvo03@calpoly.edu. I'll answer any questions :D

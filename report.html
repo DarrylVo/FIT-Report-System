@@ -11,16 +11,17 @@
 </head>
 
 
-<body>
+<body onload = "updateNames()" >
    <button onclick="randomReport()"> Save random report </button></br>	
    <button onclick ="clearTable()"> Clear Database Table </button><br><br><br>
 
-<form class="cmxform" id="commentForm" method="post" enctype = "multipart/form-data"  action="src/report.php">
+<form class="cmxform" action = ""  id="commentForm" method="post" enctype = "multipart/form-data">
   <fieldset>
     <legend>Report</legend>
     <p>
-      <label for="cname">Name (required, at least 2 characters)</label>
-      <input id="cname" name="name" minlength="2" type="text" required>
+      <label for="cname">User</label>
+      <select required id = "cname" name ="name"> </select>
+      <a href = "register.html">Create New User</a>
     </p>
     <p>
       <label for="ctext">Report Text (required)</label>

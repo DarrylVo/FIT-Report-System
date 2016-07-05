@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <script src = "src/jquery-3.0.0.min.js"></script>
+   <script src = "src/jquery.validate.js"></script>
+   <script src = "src/additional-methods.js"></script>
+   <script src = "src/jquery.form.js"> </script>
+</head>
+
+<body>
+
+<form class="cmxform" id="registerForm" method="post" enctype = "multipart/form-data">
+  <fieldset>
+    <legend>Register</legend>
+    <p>
+      <label for="cteamid">Team ID #</label>
+      <select required id = "cteamid" name ="teamid"> 
+         <option value = 1> 1 </option>
+         <option value = 2> 2 </option>
+         <option value = 3> 3 </option>
+         <option value = 4> 4 </option>
+         <option value = 5> 5 </option>
+         <option value = 6> 6 </option>
+         <option value = 7> 7 </option>
+         <option value = 8> 8 </option>
+         <option value = 9> 9 </option>
+         <option value = 10> 10 </option>
+      </select>
+    </p>
+    <p>
+      <label for="cname">User Name</label>
+      <input required id = "cname" name ="namereg"> </input>
+    </p>
+    <p>
+      <input class="submit" type="submit" value="Submit">
+    </p>
+  </fieldset>
+</form>
+
+</body>
+
+
+
+
+<script src = "src/report.js">  </script>
+
+</html>
