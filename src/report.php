@@ -132,6 +132,7 @@ else if(isset($_REQUEST['getreports'])){
 
    echo json_encode($arr);
    mysqli_free_result($retval); 
+   unset($arr);
 }
 
 //on this post, gets all the names out of the mysql db table 2!
@@ -151,6 +152,7 @@ else if(isset($_REQUEST['getnames'])){
 
    echo json_encode($arr);
    mysqli_free_result($retval); 
+   unset($arr);
 }
 
 //on this post, removes a mysql record with this id
@@ -188,7 +190,25 @@ else if(isset($_REQUEST['id'])){
    mysqli_free_result($retval2); 
 }
 
+//On this POST, only get the records specified by the date range
+else if(isset($_REQUEST['range'])){
+   $range = $_POST['range'];
+   
+   $arr = array();
+   $sql_q = 'SELECT * 
+        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN "' . $range[0] .'" AND "' .$range[1] . '"'  ;
+   $retval = mysqli_query( $mysqli, $sql_q);
+   if(! $retval ) {
+      printf("get filtered reports  error\n");
+      exit;
+   }
+   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC))  
+      $arr[] = $row;
 
+   echo json_encode($arr);
+   mysqli_free_result($retval); 
+   unset($arr);
+}
 
 mysqli_close($mysqli);
 ?>

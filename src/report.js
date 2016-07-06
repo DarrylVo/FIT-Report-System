@@ -95,7 +95,6 @@ $("#commentForm").validate({
 //this function then uses the geolcation api to send gps coords along with the form to the server
 function sendForm(form) {
 var cname = $("#cname option:selected").text();
-alert(cname  );
      globalForm = form;
      if (navigator.geolocation) 
         navigator.geolocation.getCurrentPosition(saveCoords);

@@ -70,6 +70,8 @@ function getFilteredReports() {
    }
    reports.length = 0;
    markers.length = 0
+//   reports = [];
+//   markers = [];
 
 var leftDate = $("#filter1").val();
 var rightDate = $("#filter2").val();
@@ -90,8 +92,10 @@ var range = [ leftDate, rightDate];
                          "ext" : coord_json[i].gps_ext,
                          "name" : coord_json[i].gps_name,
                          "timestamp" : coord_json[i].gps_timestamp}; 
-              if(!hasReport(rep.id))
+              if(!hasReport(rep.id)) {
                  reports.push(rep);  
+                 console.log(rep);
+              }
            }
            print.innerHTML = "got filtered reports from mysql";
        }  
@@ -228,7 +232,7 @@ function findMarker(id) {
          return markers[i];
 
    }
-   alert("COULDT FIND THE REPORT BRUH\n");
+   alert("COULDT FIND THE MARKER BRUH\n");
 }
 //checks whether marker exists in marker array
 //aka check if marker is already on map
