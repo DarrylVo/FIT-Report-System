@@ -5,6 +5,7 @@
 <head>
    <meta charset="UTF-8">
    <script src = "src/jquery-3.0.0.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="css/report.css">
    <script src = "src/jquery.validate.js"></script>
    <script src = "src/additional-methods.js"></script>
    <script src = "src/jquery.form.js"> </script>
@@ -13,7 +14,6 @@
 
 <body onload = "updateNames()" >
    <button onclick="randomReport()"> Save random report </button></br>	
-   <button onclick ="clearTable()"> Clear Database Table </button><br><br><br>
 
 <form class="cmxform" action = ""  id="commentForm" method="post" enctype = "multipart/form-data">
   <fieldset>
@@ -40,6 +40,7 @@
       <input class="submit" type="submit" value="Submit">
     </p>
   </fieldset>
+  <img id = "loading" src="images/ajax-loader.gif"></img>
 </form>
 
 	

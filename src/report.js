@@ -40,11 +40,12 @@ function updateNames() {
 
 }
 
-
-//shows a thumbnail of the picture 
-function imageIsLoaded(e) {
-    $('#myImg').attr('src', e.target.result);
-};
+//jquery function to start loading screen on ajax call start
+$(document).ajaxStart(function(){
+    $('#loading').show();
+ }).ajaxStop(function(){
+    $('#loading').hide();
+ });
 
 
 //Jquery function call that will listen for picture uploads and then updates thumbnail
@@ -57,6 +58,11 @@ $(function () {
         }
     });
 });
+
+//shows a thumbnail of the picture 
+function imageIsLoaded(e) {
+    $('#myImg').attr('src', e.target.result);
+};
 
 //jquery call to do form validation for the register name form
 $("#registerForm").validate({
@@ -119,7 +125,7 @@ function saveCoords(position) {
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
            console.log(data);
-           alert(data);
+           window.location = "http://scvwdflood.org/report.html";
         }
      });   
 }
