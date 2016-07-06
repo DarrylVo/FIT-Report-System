@@ -7,8 +7,8 @@ var globalForm;
 //sends a randomly located report to the server using ajax calls
 //TODO: make this thing generate a full on report, possibly with cat pics
 function randomReport() {
-   var la = Math.random() * (185 - 0) + 0;
-   var lo = Math.random() * (185 - 0) + 0; 
+   var la = Math.random() * (120 - 0) + 0;
+   var lo = Math.random() * (120 - 0) + 0; 
    var rand = [la, lo, "rando", "lel","kek","lmao"];
    $.ajax({
       type: "POST",

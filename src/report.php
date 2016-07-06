@@ -153,5 +153,42 @@ else if(isset($_REQUEST['getnames'])){
    mysqli_free_result($retval); 
 }
 
+//on this post, removes a mysql record with this id
+//also removes the picture!
+//god damnit do i really have to query out the extension.... Dx
+//i should really call this delete_id so its more clear...
+else if(isset($_REQUEST['id'])){
+
+   $id = $_POST['id']; 
+
+   $sql_q = 'SELECT gps_ext
+        FROM GPSCOORDS_TB1 WHERE gps_id =' . $id;
+   $retval = mysqli_query( $mysqli, $sql_q);
+   if(! $retval ) {
+      printf("getext  error\n");
+      exit;
+   }
+   $ext = mysqli_fetch_array($retval,MYSQL_ASSOC);
+   $name ="../pic/" . $id . "." . $ext['gps_ext'];
+   if(!unlink($name))
+      echo "failed to delete pic";
+   mysqli_free_result($retval);
+
+
+
+   $sql_q2 = 'DELETE FROM GPSCOORDS_TB1 WHERE gps_id = '. $id ;
+   $retval2 = mysqli_query( $mysqli, $sql_q2);
+   if(! $retval2) {
+      printf("single record delete error\n");
+      exit;
+   }
+   else 
+      echo "succ one record delete";
+
+   mysqli_free_result($retval2); 
+}
+
+
+
 mysqli_close($mysqli);
 ?>

@@ -19,10 +19,12 @@
 
 <div id = "buttons">
         <div id = "report"> </div>
-        <button onclick = "getReports()"> Get Reports </button><br>
+        <button onclick = "getAllReports()"> Get All Reports </button><br>
         <button onclick = "showReports()"> Show Reports </button><br>
-        <button onclick = "removeReport()"> Remove Reports </button><br>
-        <button onclick = "createMarkers()"> Create Markers </button><br><br><br>
+        <button onclick = "createMarkers()"> Create Markers </button>
+        <button onclick = "getFilteredReports()"> Filter Reports </button> 
+        <input id = "filter1"></input>
+        <input id = "filter2"></input>
 
         <p id = "print"></p>	
 </div>
