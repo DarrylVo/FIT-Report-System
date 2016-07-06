@@ -33,7 +33,7 @@ function getAllReports() {
         var getreports = "getreports";
 	$.ajax({
         type: "POST",
-        url: "src/report.php",
+        url: "src/view.php",
         data:{ getreports : getreports }, 
         success: function(data) {
           
@@ -79,7 +79,7 @@ var range = [ leftDate, rightDate];
 
 	$.ajax({
         type: "POST",
-        url: "src/report.php",
+        url: "src/view.php",
         data:{ range : range }, 
         success: function(data) {
           
@@ -154,7 +154,7 @@ function deleteData(id) {
 
 	$.ajax({
         type: "POST",
-        url: "src/report.php",
+        url: "src/view.php",
         data:{ id : id }, 
         success: function(data) {
            console.log(data);
