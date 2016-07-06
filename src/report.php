@@ -1,17 +1,22 @@
 <?php
 //TODO: I REALLY NEED MYSQL SANITATION
 
-//how this works php script works- on ajax posts from either view.js/report.js/register.js it will do mysql queries
+//how this works php script works- on ajax posts from report.js it will do mysql queries
+
+
+//allows videos (big files) to be uplaoded...
+
 
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
+
+
 
 //if error kill urself
 if($mysqli->connect_errno) {
    printf("Connect failed: %s\n", $mysqli->connect_error);
    exit;
 }
-
 
 //NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE AND PICTURE SAVING
 //does the report text and the picture in one go!
@@ -22,23 +27,44 @@ if($mysqli->connect_errno) {
 // i.e. for mysql record with a primary key of "1" and an extension of "png" the corresponding file is "1.png"
 //makes the pics simple to track
 
+//adding video support- tracked the same way as pictures...
+
 // DO i need further validation? *scratches head
 // oh yeah, mysql sanitation kek
-else if(isset($_REQUEST['name'])){
+else if(isset($_REQUEST['text'])){
    $coords = $_POST['coords'];
    $text = $_POST['text'];
    $name = $_POST['name'];
-   var_dump($name);
    $ext = end(explode(".",$_FILES['pic']['name']));
-   $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-       "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
-       "VALUES ".
-       "('$coords[0]', '$coords[1]','$text','$ext','$name')";
-   $result = mysqli_query($mysqli,$sql_q);
-   if(!$result) {
-      printf("report insert error\n");
-      exit;
+   $vid;   
+   if($_FILES['vid']) {	
+      $vid = end(explode(".",$_FILES['vid']['name']));
+      $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+          "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_vid) ".
+          "VALUES ".
+          "('$coords[0]', '$coords[1]','$text','$ext','$name','$vid')";
+      $result = mysqli_query($mysqli,$sql_q);
+      if(!$result) {
+         printf("report insert error\n");
+         exit;
+      } 
+
    }
+   else {
+
+      $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+          "VALUES ".
+          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
+      $result = mysqli_query($mysqli,$sql_q);
+      if(!$result) {
+         printf("report insert error\n");
+         exit;
+      } 
+
+   }
+
+
    $sql_q2 = "SELECT * FROM GPSCOORDS_TB1
      ORDER BY gps_id DESC
       LIMIT 0,1";
@@ -55,16 +81,28 @@ else if(isset($_REQUEST['name'])){
    mysqli_free_result($result2);
 
    $file = $_FILES['pic']; 
-   $n = $file['name']; 
-   $s = $file['size']; 
+//   $n = $file['name']; 
+//   $s = $file['size']; 
    $fileContent = file_get_contents($file['tmp_name']);
    $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
    if(!$test)
-      echo "couldnt open";
+      echo "couldnt open pic";
    else
-      printf("writin file\n");
+      printf("writin pic file\n");
    fwrite($test, $fileContent);
    fclose($test);
+   
+   if( $_FILES['vid']) {
+      echo "in vidright ";
+      var_dump($_FILES['vid']);
+      if (!$vidFileContent = file_get_contents($_FILES['vid']['tmp_name']))
+         echo "failed to read tmp vid file";
+      $vidFile = fopen("../pic/".$record['gps_id'].".".$vid,"x"); 
+      if(!$vidFile)
+         echo "couldnt open vid file";
+      fwrite($vidFile, $vidFileContent);
+      fclose($vidFile);
+   }
         
 }
 

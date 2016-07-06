@@ -1,7 +1,7 @@
 <?php
 //TODO: I REALLY NEED MYSQL SANITATION
 
-//how this works php script works- on ajax posts from either view.js/report.js/register.js it will do mysql queries
+//how this works php script works- on ajax posts from view.js it will do mysql queries
 
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
@@ -56,14 +56,14 @@ else if(isset($_REQUEST['getnames'])){
 }
 
 //on this post, removes a mysql record with this id
-//also removes the picture!
+//also removes the picture/video!
 //god damnit do i really have to query out the extension.... Dx
 //i should really call this delete_id so its more clear...
 else if(isset($_REQUEST['id'])){
 
    $id = $_POST['id']; 
 
-   $sql_q = 'SELECT gps_ext
+   $sql_q = 'SELECT gps_ext, gps_vid
         FROM GPSCOORDS_TB1 WHERE gps_id =' . $id;
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
@@ -74,6 +74,9 @@ else if(isset($_REQUEST['id'])){
    $name ="../pic/" . $id . "." . $ext['gps_ext'];
    if(!unlink($name))
       echo "failed to delete pic";
+   $vid = "../pic/" . $id . "." . $ext['gps_vid'];
+   unlink($vid);
+   
    mysqli_free_result($retval);
 
 

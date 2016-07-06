@@ -50,7 +50,7 @@ $(document).ajaxStart(function(){
 
 //Jquery function call that will listen for picture uploads and then updates thumbnail
 $(function () {
-    $(":file").change(function () {
+    $("#cpic").change(function () {
         if (this.files && this.files[0]) {
             var reader = new FileReader();
             reader.onload = imageIsLoaded;
@@ -91,7 +91,10 @@ $("#commentForm").validate({
    pic: {
       required: true,
       accept: "image/*"
-    }
+    },
+   vid: {
+      accept: "video/*"
+   }
   },
   submitHandler : sendForm
     
@@ -100,7 +103,6 @@ $("#commentForm").validate({
 //callback function for validation
 //this function then uses the geolcation api to send gps coords along with the form to the server
 function sendForm(form) {
-var cname = $("#cname option:selected").text();
      globalForm = form;
      if (navigator.geolocation) 
         navigator.geolocation.getCurrentPosition(saveCoords);
@@ -125,7 +127,8 @@ function saveCoords(position) {
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
            console.log(data);
-           window.location = "http://scvwdflood.org/report.html";
+           alert(data);
+          // window.location = "http://scvwdflood.org/report.html";
         }
      });   
 }
