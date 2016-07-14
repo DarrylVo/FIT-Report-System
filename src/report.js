@@ -41,6 +41,8 @@ function updateNames() {
 }
 
 
+
+/*
 //shows a thumbnail of the picture 
 function imageIsLoaded(e) {
     $('#myImg').attr('src', e.target.result);
@@ -57,6 +59,8 @@ $(function () {
         }
     });
 });
+*/
+
 
 //jquery call to do form validation for the register name form
 $("#registerForm").validate({
@@ -78,13 +82,16 @@ function registerName(form) {
 
 }
 
+
+
 //another jquery call to do form validaiton for the main report form
 //callback function to get gps coords, then send all report data to server/php
+//TODO: i cant get it to only accept all video and all image mimetypes, ill just leave file validation severside
 $("#commentForm").validate({
   rules: {
    pic: {
-      required: true,
-      accept: "image/*"
+      required: true
+    //not working  accept: "video/*, video/mp4, image/*",
     }
   },
   submitHandler : sendForm
@@ -120,7 +127,15 @@ function saveCoords(position) {
         success : function(data) {
            console.log(data);
            alert(data);
+           location.reload(true);
         }
      });   
 }
 
+//loading animation stuff
+$body = $("body");
+
+$(document).on({
+    ajaxStart: function() { $body.addClass("loading");    },
+     ajaxStop: function() { $body.removeClass("loading"); }    
+});
