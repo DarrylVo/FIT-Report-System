@@ -15,20 +15,23 @@
 <body>
         <div id="mapid"></div>
         
+<div id = "report"> </div>
 
 
 <div id = "buttons">
-        <div id = "report"> </div>
+        <input id = "filter1"></input>
+        <input id = "filter2"></input>
+        <button onclick = "getFilteredReports()"> Filter Reports </button><br> 
         <button onclick = "getAllReports()"> Get All Reports </button><br>
         <button onclick = "showReports()"> Show Reports </button><br>
         <button onclick = "createMarkers()"> Create Markers </button>
-        <button onclick = "getFilteredReports()"> Filter Reports </button> 
-        <input id = "filter1"></input>
-        <input id = "filter2"></input>
 
         <p id = "print"></p>	
 </div>
-        <script src = "src/lightbox.js"> </script>
+
+  
+<script src = "src/lightbox.js"> </script>
+
 </body>
 
 <script src = "src/view.js"> </script>

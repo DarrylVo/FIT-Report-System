@@ -28,7 +28,11 @@ else if(isset($_REQUEST['name'])){
    $coords = $_POST['coords'];
    $text = $_POST['text'];
    $name = $_POST['name'];
-   var_dump($name);
+
+
+
+
+
    $ext = end(explode(".",$_FILES['pic']['name']));
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
        "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
@@ -64,6 +68,11 @@ else if(isset($_REQUEST['name'])){
    else
       printf("writin file\n");
    fwrite($test, $fileContent);
+
+
+
+
+
    fclose($test);
         
 }
@@ -124,4 +133,32 @@ else if(isset($_REQUEST['getnames'])){
 
 
 mysqli_close($mysqli);
+
+
+//functions to get gps data from exif instead of the report
+function getGps($exifCoord, $hemi) {
+
+    $degrees = count($exifCoord) > 0 ? gps2Num($exifCoord[0]) : 0;
+    $minutes = count($exifCoord) > 1 ? gps2Num($exifCoord[1]) : 0;
+    $seconds = count($exifCoord) > 2 ? gps2Num($exifCoord[2]) : 0;
+
+    $flip = ($hemi == 'W' or $hemi == 'S') ? -1 : 1;
+
+    return $flip * ($degrees + $minutes / 60 + $seconds / 3600);
+
+}
+
+function gps2Num($coordPart) {
+
+    $parts = explode('/', $coordPart);
+
+    if (count($parts) <= 0)
+        return 0;
+
+    if (count($parts) == 1)
+        return $parts[0];
+
+    return floatval($parts[0]) / floatval($parts[1]);
+}
+
 ?>

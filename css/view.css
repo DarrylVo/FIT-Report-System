@@ -10,8 +10,20 @@ body {
 }
 
 #buttons {
-float : right;
+float : left;
 
+}
+#report {
+height: 600px;
+  width: 20%;
+  float: right;
+  overflow: scroll;
+}
+
+.content {
+  width: 70%; 
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px;
 }
 
 body, input, select, textarea { 

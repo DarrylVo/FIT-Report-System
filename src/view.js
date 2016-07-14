@@ -112,11 +112,11 @@ function showReports() {
       var id = $("<p></p>").text("ID:."+ reports[i].id);
       var name = $("<p></p>").text("Name:."+ reports[i].name);
       var text = $("<p></p>").text("Text:"+ reports[i].text);
-      var del = $("<a></a>").text("Delete");
+      var del = $("<button></button>").text("Delete");
       del.on("click", reports[i].id, function(e) {
                                                                   deleteData(e.data);
                                                                 });
-      var zoom = $("<a></a>").text("Zoom").on("click", reports[i].id, function(e) {
+      var zoom = $("<button></button>").text("Zoom").on("click", reports[i].id, function(e) {
 
                                                                       zoomOnMarker(findMarker(e.data));
                                                                       });
@@ -125,6 +125,7 @@ function showReports() {
       div.append(text);
       div.append(zoom);
       div.append(del);
+      div.attr("class","content");
       $("#report").append(div);
     
    }
@@ -182,7 +183,26 @@ function createMarkers() {
 
 //binds popup containing report data to marker!
 function markerBind(marker, report) {
-   var src = '"pic/' + report.id + "." + report.ext + '"';
+   var src = 'pic/' + report.id + "." + report.ext;
+   var lat = $("<p></p>").text("Latitude: " + report.lat);
+   var long = $("<p></p>").text("Longitude: " + report.long);
+   var time = $("<p></p>").text("Timestamp: " + report.timestamp);
+   var name = $("<p></p>").text("name: " + report.name);
+   var text = $("<p></p>").text("Text: " + report.text);
+   var div;
+   var link;
+   if((/(gif|jpg|jpeg|tiff|png)$/i).test(report.ext)) {
+      link = $("<a></a>").attr("href",src).attr("data-lightbox","imag1");
+      link.append($("<img></img>").attr("src",src).attr("width",50).attr("height",50));
+   }
+   else {
+      link = $("<video controls></video>").attr("width",320).attr("height",240);
+      link.append($("<source></source>").attr("src",src).attr("type","video/mp4")); 
+
+   } 
+   div = $("<div></div>").append(lat,long,time,name,text, link);
+   marker.bindPopup(div.html());
+/*
    marker.bindPopup("Latitude: " +report.lat +"<br>" 
                     + "Longitude: " + report.long +"<br>"
                     + "Timestamp: " + report.timestamp +"<br>"
@@ -191,7 +211,7 @@ function markerBind(marker, report) {
                     +  '<a href = "pic/' + report.id + "." + report.ext + '" data-lightbox = "image1" >' +   ' <img width = "50" height = "50" src=' + src +  '></img><br>'    +   '</a>'
                      
                     );
-
+*/
 }
 
 
