@@ -17,3 +17,14 @@ This uses jquery, lightbox, leaflet, and maybe some other plugins for jquery i f
 Its a rather simple program, didn't want to get too crazy with stuff like react/angular/w.e.
 
 if you got any questions, email me dvo03@calpoly.edu. I'll answer any questions :D
+
+
+Libraries Used:
+Leaflet for maps
+Lightbox for better picture viewing
+Jquery
+jquery validation plugin
+jquery form submit pugin
+getID3 to get out gps info from the videos/pictures
+
+Mysql for database

@@ -6,6 +6,9 @@
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 
+//dependency for the getid3 library
+require_once("getID3/getid3/getid3.php");
+
 //if error kill urself
 if($mysqli->connect_errno) {
    printf("Connect failed: %s\n", $mysqli->connect_error);
@@ -18,22 +21,38 @@ if($mysqli->connect_errno) {
 //the trigger to this ajax POST response is only after validation!
 //stores the text/coords into mysql, then gets the primary key of that new mysql to
 //use as the name of the uploaded photo
-//file extension is also saved in the mysql db so we can figure out the the the corresponding photo
+//file extension is also saved in the mysql db so we can figure out the the the corresponding photo/video
 // i.e. for mysql record with a primary key of "1" and an extension of "png" the corresponding file is "1.png"
-//makes the pics simple to track
+//makes the files simple to track
+//also by default gps coordinates will be attempted to be extracted from the meta data of the pictures/videos. 
+//If none are present the gps coordinates from the report post will be stored. those "backup" gps coordinates are the location of the phone when the report was submitted.
 
 // DO i need further validation? *scratches head
-// oh yeah, mysql sanitation kek
+//TODO: oh yeah, mysql sanitation kek
 else if(isset($_REQUEST['name'])){
-   $coords = $_POST['coords'];
    $text = $_POST['text'];
    $name = $_POST['name'];
-
-
-
-
-
    $ext = end(explode(".",$_FILES['pic']['name']));
+  // $coords = $_POST['coords'];
+
+   
+   $getID3 = new getID3;
+
+   // Analyze file and store returned data in $ThisFileInfo
+   $metaData = $getID3->analyze($_FILES['pic']['tmp_name']);
+   getid3_lib::CopyTagsToComments($metaData);
+  // var_dump($metaData);
+   if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
+      $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
+   }
+   else if(isset($metaData['jpg']['exif']['GPS'])) {
+      $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
+   }
+   else {
+      $coords = $_POST['coords'];
+   }
+
+
    $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
        "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
        "VALUES ".
@@ -59,9 +78,9 @@ else if(isset($_REQUEST['name'])){
    mysqli_free_result($result2);
 
    $file = $_FILES['pic']; 
-   $n = $file['name']; 
-   $s = $file['size']; 
    $fileContent = file_get_contents($file['tmp_name']);
+
+
    $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
    if(!$test)
       echo "couldnt open";

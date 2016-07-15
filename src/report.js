@@ -115,6 +115,8 @@ var cname = $("#cname option:selected").text();
 
 //callback to geolocation api save coordinates
 //also submits it because the gps coordinates call is asychronous, so it must be done here.
+//otherwise you'll run into problems where the gps call isn't done yet, but then the form submit happens
+//so you send null cordinate data... man that took me a long time to figure out.
 function saveCoords(position) {
    coords[0] = position.coords.latitude;
    coords[1] = position.coords.longitude;
@@ -127,7 +129,7 @@ function saveCoords(position) {
         success : function(data) {
            console.log(data);
            alert(data);
-           location.reload(true);
+  //         location.reload(true);
         }
      });   
 }
