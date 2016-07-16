@@ -2,26 +2,30 @@ body {
    padding: 0;
    margin: 0;
 }
+input {
+   margin-top : 10px;
+   margin-bottom : 10px;
+}
+
 #mapid {
-   height: 600px;
-   width: 80%;
+   height: 1000px;
+   width: 78%;
    float :left;
 
 }
 
 #buttons {
-float : left;
-
+float : right;
+width : 22%;
 }
 #report {
 height: 600px;
-  width: 20%;
+  width: 22%;
   float: right;
   overflow: scroll;
 }
 
 .content {
-  width: 70%; 
   background: rgba(255, 255, 255, 0.7);
   padding: 10px;
 }
@@ -31,4 +35,7 @@ body, input, select, textarea {
    font-size:11px; 
 }
 
+#filter2 {
 
+margin-left : 15px;
+}

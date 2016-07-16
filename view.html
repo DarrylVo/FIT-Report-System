@@ -10,23 +10,37 @@
 	<script src="src/leaflet.js"></script>
 	<link rel="stylesheet" href="css/view.css" />
 	<link rel="stylesheet" href="css/lightbox.css" />
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<link rel="stylesheet" href="css/jquery-ui.structure.css" />
+	<link rel="stylesheet" href="css/jquery-ui.theme.css" />
+	<script src="src/jquery-ui.js"></script>
 </head>
 
 <body>
-        <div id="mapid"></div>
-        
-<div id = "report"> </div>
+       
+<div id="mapid"></div>
 
+<div id ="sidebar">
+   <div id = "report"> </div>
 
-<div id = "buttons">
-        <input id = "filter1"></input>
+   <div id = "buttons">
+     <fieldset>
+        <legend> Report Viewing Options </legend>
+        <label for="all"> Show All </label>
+        <input type = "radio" name = "radio1" id = "all">  </input><br>
+        <label for="filter"> Filter by Date </label>
+        <input type = "radio" name = "radio1" id = "filter">  </input>
+        <button id="updateFilter"> Update Filter </button> <br>
+        <label for ="filter1"> From: </label>
+        <input id = "filter1"></input><br>
+        <label for = "filter2"> To:   </label>
         <input id = "filter2"></input>
-        <button onclick = "getFilteredReports()"> Filter Reports </button><br> 
-        <button onclick = "getAllReports()"> Get All Reports </button><br>
-        <button onclick = "showReports()"> Show Reports </button><br>
-        <button onclick = "createMarkers()"> Create Markers </button>
+        <label for = "realtime"> Realtime </label>
+        <input type = "checkbox" name = "cbox1" id = "realtime"></input><br>
 
         <p id = "print"></p>	
+    </fieldset>
+   </div>
 </div>
 
   

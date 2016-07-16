@@ -45,7 +45,7 @@ else if(isset($_REQUEST['name'])){
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
    }
-   else if(isset($metaData['jpg']['exif']['GPS'])) {
+   else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
       $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
    }
    else {

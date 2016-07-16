@@ -7,6 +7,8 @@ var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
 var reports = [];
 var markers = [];
 var print = document.getElementById("print");
+var refreshId = -1;
+
 //map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -24,12 +26,91 @@ mymap.on('popupopen', function(centerMarker) {
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
     });
 
+//jquery calls for ui init
+$("#filter1").datepicker();
+$("#filter1").datepicker("option", "dateFormat", "yy-mm-dd").attr("disabled",true);
+$("#filter2").datepicker();
+$("#filter2").datepicker("option", "dateFormat", "yy-mm-dd").attr("disabled",true);
+$("#all").checkboxradio();
+$("#filter").checkboxradio();
+$("#realtime").checkboxradio();
+$("#realtime").checkboxradio("option","disabled",true);
+$("#updateFilter").button();
+$("#updateFilter").button("option","disabled",true);
 
+//set onlick event handler for the ui stuff
+
+//on "Show All" click, activate polling and disable filter boxes
+$("#all").on("click",function() {
+   if(refreshId != -1) {
+      window.clearInterval(refreshId);
+      refreshId = window.setInterval(getAllReports, 2000);
+   }
+   else
+      refreshId = window.setInterval(getAllReports, 2000);
+   $("#filter1").attr("disabled",true); 
+   $("#filter2").attr("disabled",true); 
+   $("#realtime").checkboxradio("option","disabled",true); 
+   $("#updateFilter").button("option","disabled",true);
+});
+
+
+//on "Filter by Date" click, deactivate polling and reactivate filter boxes
+$("#filter").on("click", function() {
+   window.clearInterval(refreshId);
+   refreshId = -1;
+   $("#filter1").attr("disabled",false); 
+   $("#filter2").attr("disabled",false); 
+   $("#realtime").checkboxradio("option","disabled",false); 
+   $("#updateFilter").button("option","disabled",false);
+});
+
+
+//on the "Realtime" click, disable the second filter field
+$("#realtime").on("click", function() {
+   if($("#filter2").attr("disabled"))
+      $("#filter2").attr("disabled",false); 
+   else
+      $("#filter2").attr("disabled",true); 
+});
+
+//on the "update Filter" click, check to see if the fields are filled out correctly,
+//and then call the getFilteredReport funtion.
+
+$("#updateFilter").on("click", function() {
+   if($("#filter1").datepicker("getDate")!=null) {
+      if($("#realtime").prop("checked") == true) {
+         if(refreshId != -1) {
+            window.clearInterval(refreshId);
+            clearLocalData();
+           refreshId =  window.setInterval(getFilteredReports, 2000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+
+         }
+         else {
+            clearLocalData();
+           refreshId =  window.setInterval(getFilteredReports, 2000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+
+         } 
+         
+     }
+     else if($("filter2").datepicker("getDate")!=null) { 
+         if(refreshId != -1) {
+            window.clearInterval(refreshId);
+            refreshId = -1;
+         }
+        clearLocalData();
+        getFilteredReports('"'+$("#filter1").val()+'"', '"'+$("#filter2").val() + ' 23:59:59"');
+     }  
+ }
+
+});
+
+                  
 
 // does ajax call/return to get the all reports from the mysql db
 // if the report already exists (by gps_id) it will not push it on the array
 function getAllReports() {
-
+        print.innerHtml = "getreportcal"
         var getreports = "getreports";
 	$.ajax({
         type: "POST",
@@ -51,31 +132,37 @@ function getAllReports() {
                  console.log(rep);
               }
            }
+           //the call is here because ajax is asynchronous. this guarantees these functions are ONLy run after the ajax call ends
+           showReports();
+           createMarkers();
            print.innerHTML = "got reports from mysql";
        }  
        })
 
 }
 
-//clears out the reports array, marker array, and removes all current markers from the map and then gets only the records indicated by the input data range.
-//DOES NOT touch anything in the mysql database. only deletes local data to do the filtering
+//helper function to clear out local report data
+function clearLocalData() {
+
+      for(var i = 0; i < reports.length; i ++) {
+         var id = reports[i].id;
+         $("#"+id).remove();
+         mymap.removeLayer(findMarker(id));
+
+      }
+      reports.length = 0;
+      markers.length = 0
+
+}
+
+//gets a subset of the reports indictated by left and right date
 //TODO: give a better name, like getcertainreports or some shit
-function getFilteredReports() {
+function getFilteredReports(leftDate, rightDate) {
 
-   for(var i = 0; i < reports.length; i ++) {
-      var id = reports[i].id;
-      $("#"+id).remove();
-      mymap.removeLayer(findMarker(id));
+  
+   
 
-   }
-   reports.length = 0;
-   markers.length = 0
-//   reports = [];
-//   markers = [];
-
-var leftDate = $("#filter1").val();
-var rightDate = $("#filter2").val();
-var range = [ leftDate, rightDate];
+   var range = [ leftDate, rightDate];
 
 	$.ajax({
         type: "POST",
@@ -97,6 +184,9 @@ var range = [ leftDate, rightDate];
                  console.log(rep);
               }
            }
+           //if ur wondering why this is here, look at the comments for getAllReports()
+           showReports();
+           createMarkers();
            print.innerHTML = "got filtered reports from mysql";
        }  
        })
@@ -107,27 +197,32 @@ var range = [ leftDate, rightDate];
 function showReports() {
 
    for(var i = 0; i < reports.length; i++) {
+      if(hasMarker(reports[i].id))
+         continue;
+      var div = $("<div></div>");
+      $(div).attr("id",reports[i].id.toString());
 
-      var div = $("<div></div>").attr("id",reports[i].id.toString());
       var id = $("<p></p>").text("ID:."+ reports[i].id);
       var name = $("<p></p>").text("Name:."+ reports[i].name);
       var text = $("<p></p>").text("Text:"+ reports[i].text);
-      var del = $("<button></button>").text("Delete");
+      var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
                                                                   deleteData(e.data);
                                                                 });
-      var zoom = $("<button></button>").text("Zoom").on("click", reports[i].id, function(e) {
-
-                                                                      zoomOnMarker(findMarker(e.data));
+      var zoom = $("<button></button>").button({label:"Zoom"});
+      zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                       });
-      div.append(id);
-      div.append(name);
+      var innerDiv = $("<div></div>").append(name,text,zoom,del);
+     /* div.append(name);
       div.append(text);
       div.append(zoom);
-      div.append(del);
+      div.append(del);*/
       div.attr("class","content");
+      div.append(id); 
+      div.append(innerDiv);
       $("#report").append(div);
-    
+      div.accordion({collapsible:true, active : false});
+        
    }
 
 
@@ -135,7 +230,6 @@ function showReports() {
 }
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
-        console.log(centerMarker);
         mymap.setView(centerMarker._latlng,15, {animate: true, 
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
             centerMarker.openPopup();
@@ -276,3 +370,7 @@ function removeMarker(id) {
    return false;
 
 }
+
+
+
+

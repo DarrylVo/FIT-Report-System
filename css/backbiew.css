@@ -1,0 +1,42 @@
+body {
+   padding: 0;
+   margin: 0;
+}
+input {
+   margin-top : 10px;
+   margin-bottom : 10px;
+}
+
+#mapid {
+   height: 600px;
+   width: 78%;
+   float :left;
+
+}
+
+
+#buttons {
+float : right;
+width : 22%;
+}
+#report {
+height: 600px;
+  width: 22%;
+  float: right;
+  overflow: scroll;
+}
+
+.content {
+  background: rgba(255, 255, 255, 0.7);
+  
+}
+
+body, input, select, textarea { 
+   font-family:Verdana, Arial, Helvetica, sans-serif; 
+   font-size:11px; 
+}
+
+#filter2 {
+
+margin-left : 15px;
+}

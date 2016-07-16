@@ -96,7 +96,7 @@ else if(isset($_REQUEST['range'])){
    
    $arr = array();
    $sql_q = 'SELECT * 
-        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN "' . $range[0] .'" AND "' .$range[1] . '"'  ;
+        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN ' . $range[0] .' AND ' .$range[1]   ;
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
       printf("get filtered reports  error\n");
