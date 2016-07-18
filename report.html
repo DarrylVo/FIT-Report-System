@@ -4,15 +4,12 @@
 
 <head>
    <meta charset="UTF-8">
+<meta name=viewport content='width=330'>
    <script src = "src/jquery-3.0.0.min.js"></script>
    <script src = "src/jquery.validate.js"></script>
    <script src = "src/additional-methods.js"></script>
    <script src = "src/jquery.form.js"> </script>
    <link rel="stylesheet" href="css/report.css" />
-	<link rel="stylesheet" href="css/jquery-ui.css" />
-	<link rel="stylesheet" href="css/jquery-ui.structure.css" />
-	<link rel="stylesheet" href="css/jquery-ui.theme.css" />
-	<script src="src/jquery-ui.js"></script>
 </head>
 
 
@@ -29,12 +26,11 @@
     </p>
     <p>
       <label for="ctext">Report Text (required)</label>
-      <textarea id="ctext" name="text" required></textarea>
+      <textarea id="ctext" rows = "5" cols = "40" name="text" required></textarea>
     </p>
     <p>
       <label for="cpic">Required, picture/video files only: </label>
       <input type="file" id="cpic" name="pic">
-      <img src = "" id = "myImg" height = "50" width = "50"/>
     </p>
    <!-- <p>
       <label for="cvid">Video: </label>

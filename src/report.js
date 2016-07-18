@@ -4,6 +4,8 @@
 var coords = new Array(2);
 var globalForm;
 
+
+
 //sends a randomly located report to the server using ajax calls
 //TODO: make this thing generate a full on report, possibly with cat pics
 function randomReport() {

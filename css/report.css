@@ -28,3 +28,6 @@ body.loading {
 body.loading .modal {
     display: block;
 }
+#commentForm {
+display: inline-block;
+}
