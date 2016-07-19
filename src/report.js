@@ -66,7 +66,18 @@ $(function () {
 
 //jquery call to do form validation for the register name form
 $("#registerForm").validate({
-     submitHandler : registerName});
+     errorElement : "div",
+     errorContainer : ".errorText",
+     submitHandler : registerName,
+     rules : {
+          namereg : {
+             required : true,
+             minlength : 1
+          }},
+     messages: {
+          namereg : "Enter a name"
+          }
+          });
 
 //callback function for validation for the register name form
 
@@ -90,6 +101,7 @@ function registerName(form) {
 //callback function to get gps coords, then send all report data to server/php
 //TODO: i cant get it to only accept all video and all image mimetypes, ill just leave file validation severside
 $("#commentForm").validate({
+  errorElement : "p",
   rules: {
    pic: {
       required: true

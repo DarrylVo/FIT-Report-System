@@ -202,9 +202,10 @@ function showReports() {
       var div = $("<div></div>");
       $(div).attr("id",reports[i].id.toString());
 
-      var id = $("<p></p>").text("ID:."+ reports[i].id);
-      var name = $("<p></p>").text("Name:."+ reports[i].name);
-      var text = $("<p></p>").text("Text:"+ reports[i].text);
+      var id = $("<p></p>").text("ID: "+ reports[i].id);
+      var timestamp = $("<p></p>").text("Timestamp: " + reports[i].timestamp);
+      var name = $("<p></p>").text("Name: "+ reports[i].name);
+      var text = $("<p></p>").text("Text: "+ reports[i].text);
       var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
                                                                   deleteData(e.data);
@@ -212,7 +213,7 @@ function showReports() {
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                       });
-      var innerDiv = $("<div></div>").append(name,text,zoom,del);
+      var innerDiv = $("<div></div>").append(name,timestamp,text,zoom,del);
      /* div.append(name);
       div.append(text);
       div.append(zoom);
@@ -232,6 +233,7 @@ function showReports() {
 function zoomOnMarker(centerMarker) {
         mymap.setView(centerMarker._latlng,15, {animate: true, 
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
+     //   mymap.panTo(centerMarker._latlng);
             centerMarker.openPopup();
 }
 

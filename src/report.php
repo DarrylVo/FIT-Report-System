@@ -35,28 +35,114 @@ else if(isset($_REQUEST['name'])){
    $ext = end(explode(".",$_FILES['pic']['name']));
   // $coords = $_POST['coords'];
 
-   
+  //uses id3 library to get metadata about video/photos 
    $getID3 = new getID3;
 
-   // Analyze file and store returned data in $ThisFileInfo
    $metaData = $getID3->analyze($_FILES['pic']['tmp_name']);
    getid3_lib::CopyTagsToComments($metaData);
-  // var_dump($metaData);
+ 
+
+//   var_dump($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']);
+//this part is a little dirty, checks for the existense of tags to use in the mysql store
+
+    //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
+      //if the video file also has iphone timestamp....
+      if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
+      
+        // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
+        $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
+        $date = $exp[0] ." ". substr($exp[1],0,-5);
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+
+      }
+      //or a android style timestamp
+      else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
+         $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
+        
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+      }
+      else {
+          echo "2";
+        // var_dump($metaData['tags_html']['quicktime']);       
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+          "VALUES ".
+          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
+      }
    }
+   //if its a picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
       $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
+       //if picture also has timestamp...
+      if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
+         $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+
+      }
+      else {
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+          "VALUES ".
+          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
+      }
    }
+   //if it has no gps coordinates...
    else {
       $coords = $_POST['coords'];
+      //but it may still have an iphone timestamp
+      if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
+       echo "1"; 
+        // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
+        $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
+        $date = $exp[0] ." ". substr($exp[1],0,-5);
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+
+      }
+
+      //but it may still have an android video timestamp
+      else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
+         echo "2";
+         $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+      }
+      //or a photo timestamp...
+      else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
+        echo "3";
+         $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+           "VALUES ".
+           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+
+      }
+     //or absolutely nothing at all
+      else {
+         echo "4";
+         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+          "VALUES ".
+          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
+      }
    }
 
 
-   $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-       "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
-       "VALUES ".
-       "('$coords[0]', '$coords[1]','$text','$ext','$name')";
    $result = mysqli_query($mysqli,$sql_q);
    if(!$result) {
       printf("report insert error\n");
@@ -84,8 +170,6 @@ else if(isset($_REQUEST['name'])){
    $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
    if(!$test)
       echo "couldnt open";
-   else
-      printf("writin file\n");
    fwrite($test, $fileContent);
 
 
@@ -153,7 +237,7 @@ else if(isset($_REQUEST['getnames'])){
 
 mysqli_close($mysqli);
 
-
+/*
 //functions to get gps data from exif instead of the report
 function getGps($exifCoord, $hemi) {
 
@@ -178,6 +262,6 @@ function gps2Num($coordPart) {
         return $parts[0];
 
     return floatval($parts[0]) / floatval($parts[1]);
-}
+}*/
 
 ?>

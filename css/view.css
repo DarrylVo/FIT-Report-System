@@ -16,22 +16,24 @@ input {
 #sidebar {
    float : right;
    width : 20%;
+   height : 100%;
 }
 
 #buttons {
+   height : 20%;
 }
 #report {
   overflow: scroll;
+   height : 80%;
 }
 
 .content {
   background: rgba(255, 255, 255, 0.7);
-  padding: 10px;
 }
 
 body, input, select, textarea { 
    font-family:Verdana, Arial, Helvetica, sans-serif; 
-   font-size:11px; 
+   font-size:15px; 
 }
 
 #filter2 {

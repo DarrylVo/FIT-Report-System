@@ -1,0 +1,13 @@
+.error {
+color:red;
+font-family:verdana, Helvetica;
+}
+
+#cname {
+   font-size : 16px;
+}
+
+.errorTxt{
+  border: 1px solid red;
+  min-height: 20px;
+}

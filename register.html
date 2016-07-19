@@ -2,11 +2,13 @@
 <html>
 
 <head>
+   <meta name=viewport content='width=300'>
    <meta charset="UTF-8">
    <script src = "src/jquery-3.0.0.min.js"></script>
    <script src = "src/jquery.validate.js"></script>
    <script src = "src/additional-methods.js"></script>
    <script src = "src/jquery.form.js"> </script>
+   <link rel="stylesheet" href="css/register.css" />
 </head>
 
 <body>
@@ -30,8 +32,8 @@
       </select>
     </p>
     <p>
-      <label for="cname">User Name</label>
-      <input required id = "cname" name ="namereg"> </input>
+      <label for="namereg">Name: </label > <br>
+      <input required type="text" id = "cname" name ="namereg"> </input>
     </p>
     <p>
       <input class="submit" type="submit" value="Submit">

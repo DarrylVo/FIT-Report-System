@@ -12,8 +12,6 @@ if you migrate this program into a new server, becareful about the mysql table n
 Hopefully ill have made an install script to do that for you. otherwise you gotta hunt through the code for the names. sorry!
 
 
-This uses jquery, lightbox, leaflet, and maybe some other plugins for jquery i forgot. 
-
 Its a rather simple program, didn't want to get too crazy with stuff like react/angular/w.e.
 
 if you got any questions, email me dvo03@calpoly.edu. I'll answer any questions :D
@@ -28,3 +26,6 @@ jquery form submit pugin
 getID3 to get out gps info from the videos/pictures
 
 Mysql for database
+
+dont forget for the php.ini set so that bigger files can be POSTed.
+
