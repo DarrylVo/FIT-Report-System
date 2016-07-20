@@ -20,11 +20,10 @@ input {
 }
 
 #buttons {
-   height : 20%;
 }
 #report {
   overflow: scroll;
-   height : 80%;
+   height : 50%;
 }
 
 .content {
@@ -35,8 +34,11 @@ body, input, select, textarea {
    font-family:Verdana, Arial, Helvetica, sans-serif; 
    font-size:15px; 
 }
+#filter1 {
+width : 90px;
+}
 
 #filter2 {
-
-margin-left : 15px;
+width : 90px;
+margin-left : 19px;
 }

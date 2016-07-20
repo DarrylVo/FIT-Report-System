@@ -116,13 +116,16 @@ $("#commentForm").validate({
 //this function then uses the geolcation api to send gps coords along with the form to the server
 function sendForm(form) {
 var cname = $("#cname option:selected").text();
+         console.log("start check");
      globalForm = form;
-     if (navigator.geolocation) 
-        navigator.geolocation.getCurrentPosition(saveCoords);
-     else { 
-        alert("no gps support. update yo browser");
+     if (navigator.geolocation) {
 
-      }
+        navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION TO SUBMIT REPORT");});
+         console.log("geo location enabled");
+     } 
+     else { 
+          alert("geolocation not supported, will not save report gps coordinates");
+       }
 
 
 }

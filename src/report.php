@@ -48,9 +48,10 @@ else if(isset($_REQUEST['name'])){
     //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
+      echo "found gps video";
       //if the video file also has iphone timestamp....
       if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-      
+        echo "found iphone timestamp";
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
@@ -62,6 +63,7 @@ else if(isset($_REQUEST['name'])){
       }
       //or a android style timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
+         echo "found android timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
         
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
@@ -70,7 +72,7 @@ else if(isset($_REQUEST['name'])){
            "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
       }
       else {
-          echo "2";
+          echo "found no timestamp";
         // var_dump($metaData['tags_html']['quicktime']);       
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
           "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
@@ -80,9 +82,11 @@ else if(isset($_REQUEST['name'])){
    }
    //if its a picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
+      echo "found picture with gps coordinates";
       $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
-       //if picture also has timestamp...
+       //if picture also has timestamp...i
       if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
+        echo "found timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
            "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
@@ -91,6 +95,7 @@ else if(isset($_REQUEST['name'])){
 
       }
       else {
+         echo "didnt find timestamp";
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
           "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
           "VALUES ".
@@ -99,10 +104,11 @@ else if(isset($_REQUEST['name'])){
    }
    //if it has no gps coordinates...
    else {
+       echo "couldnt find any gps coordinates";
       $coords = $_POST['coords'];
       //but it may still have an iphone timestamp
       if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-       echo "1"; 
+       echo "found iphone timestamp"; 
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
@@ -115,7 +121,7 @@ else if(isset($_REQUEST['name'])){
 
       //but it may still have an android video timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
-         echo "2";
+         echo "found android video timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
            "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
@@ -124,7 +130,7 @@ else if(isset($_REQUEST['name'])){
       }
       //or a photo timestamp...
       else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
-        echo "3";
+        echo "found photo timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
            "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
@@ -134,7 +140,7 @@ else if(isset($_REQUEST['name'])){
       }
      //or absolutely nothing at all
       else {
-         echo "4";
+         echo "found no timestamps at all";
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
           "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
           "VALUES ".

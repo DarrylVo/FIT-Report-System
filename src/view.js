@@ -20,10 +20,11 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 //map callback stuff. this one centers the map on the marker popup when clicked on.
 //this callback function is attached directly to the map, not the marke!
 mymap.on('popupopen', function(centerMarker) {
-        var cM = mymap.project(centerMarker.popup._latlng);
-        cM.y -= centerMarker.popup._container.clientHeight/2
-        mymap.setView(centerMarker.popup._latlng,15, {animate: true, 
-                                                      pan: {duration : 0.25, easeLinearity : 0.25  }   });
+   var targetPoint = mymap.project(centerMarker.popup._latlng, 15).subtract([0, 150]);
+ var newPoint = mymap.unproject(targetPoint, 15);
+       mymap.setView(newPoint, 15);
+       // mymap.panTo(newPoint);
+     //   mymap.setZoomAround(newPoint, 15);
     });
 
 //jquery calls for ui init
@@ -231,10 +232,11 @@ function showReports() {
 }
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
-        mymap.setView(centerMarker._latlng,15, {animate: true, 
+        mymap.setView(centerMarker._latlng,13,{animate: true, 
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
+       // mymap.setZoom(15);
      //   mymap.panTo(centerMarker._latlng);
-            centerMarker.openPopup();
+         //   centerMarker.openPopup();
 }
 
 //deletes the report and marker with this id. removes it from the map too, marker and the sidebar.
@@ -266,7 +268,7 @@ function deleteData(id) {
 function createMarkers() {
    for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
-         var marker = L.marker([reports[i].lat, reports[i].long],{title:reports[i].id }).addTo(mymap);
+         var marker = L.marker([reports[i].lat, reports[i].long],{title:reports[i].id , autoPan : false, keepInView : false}).addTo(mymap);
          markerBind(marker, reports[i]);
          markers.push(marker);
          console.log(marker);
@@ -280,11 +282,12 @@ function createMarkers() {
 //binds popup containing report data to marker!
 function markerBind(marker, report) {
    var src = 'pic/' + report.id + "." + report.ext;
-   var lat = $("<p></p>").text("Latitude: " + report.lat);
-   var long = $("<p></p>").text("Longitude: " + report.long);
+   var lat = $("<p></p>").text("Lat/Long: " + report.lat + ", " + report.long).css('line-height', '1em');
    var time = $("<p></p>").text("Timestamp: " + report.timestamp);
    var name = $("<p></p>").text("name: " + report.name);
    var text = $("<p></p>").text("Text: " + report.text);
+
+
    var div;
    var link;
    if((/(gif|jpg|jpeg|tiff|png)$/i).test(report.ext)) {
@@ -296,7 +299,7 @@ function markerBind(marker, report) {
       link.append($("<source></source>").attr("src",src).attr("type","video/mp4")); 
 
    } 
-   div = $("<div></div>").append(lat,long,time,name,text, link);
+   div = $("<div></div>").append(lat,time,name,text, link);
    marker.bindPopup(div.html());
 /*
    marker.bindPopup("Latitude: " +report.lat +"<br>" 
