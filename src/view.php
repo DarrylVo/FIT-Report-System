@@ -21,7 +21,7 @@ else if(isset($_REQUEST['getreports'])){
 
    $arr = array();
    $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp  
-        FROM GPSCOORDS_TB1';
+        FROM GPSCOORDS_TB1 ORDER BY gps_timestamp';
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
       printf("getcoords error\n");
@@ -96,7 +96,7 @@ else if(isset($_REQUEST['range'])){
    
    $arr = array();
    $sql_q = 'SELECT * 
-        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN ' . $range[0] .' AND ' .$range[1]   ;
+        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN ' . $range[0] .' AND ' .$range[1] . ' ORDER BY gps_timestamp'  ;
    $retval = mysqli_query( $mysqli, $sql_q);
    if(! $retval ) {
       printf("get filtered reports  error\n");

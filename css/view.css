@@ -35,10 +35,10 @@ body, input, select, textarea {
    font-size:15px; 
 }
 #filter1 {
-width : 90px;
+width : 100px;
 }
 
 #filter2 {
-width : 90px;
-margin-left : 19px;
+width : 100px;
+margin-left : 21px;
 }

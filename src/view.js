@@ -17,16 +17,39 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
     accessToken: 'pk.eyJ1Ijoicm9zZ2x1ZSIsImEiOiJjaXBzbDkzdXcwM3c1ZmttMjhyNzR1bmVxIn0.g45wbGBB5SprrAES2ju06Q'
 }).addTo(mymap);
 
+//custom icon
+var LeafIcon = L.Icon.extend({
+    options: {
+     //   shadowUrl: 'images/leaf-shadow.png',
+        iconSize:     [38, 38],
+      //  shadowSize:   [50, 64],
+        iconAnchor:   [22, 40],
+        shadowAnchor: [4, 38],
+        popupAnchor:  [-3, -38]
+    }
+});
+
+var greenIcon = new LeafIcon({iconUrl: 'images/red-circle.png'});
+var orangeIcon = new LeafIcon({iconUrl: 'images/blu-circle.png'});
+var redIcon = new LeafIcon({iconUrl: 'images/leaf-red.png'});
+
 //map callback stuff. this one centers the map on the marker popup when clicked on.
 //this callback function is attached directly to the map, not the marke!
+//should it be attached to the marker or the map???
+/*
 mymap.on('popupopen', function(centerMarker) {
+       for(var i = 0; i < markers.length; i ++ ) {
+           markers[i].setIcon(greenIcon);
+        }
+        centerMarker.popup.setIcon(orangeIcon);
+console.log(centerMarker.popup);
    var targetPoint = mymap.project(centerMarker.popup._latlng, 15).subtract([0, 150]);
  var newPoint = mymap.unproject(targetPoint, 15);
        mymap.setView(newPoint, 15);
        // mymap.panTo(newPoint);
      //   mymap.setZoomAround(newPoint, 15);
     });
-
+*/
 //jquery calls for ui init
 $("#filter1").datepicker();
 $("#filter1").datepicker("option", "dateFormat", "yy-mm-dd").attr("disabled",true);
@@ -43,6 +66,7 @@ $("#updateFilter").button("option","disabled",true);
 
 //on "Show All" click, activate polling and disable filter boxes
 $("#all").on("click",function() {
+   clearLocalData();
    if(refreshId != -1) {
       window.clearInterval(refreshId);
       refreshId = window.setInterval(getAllReports, 2000);
@@ -111,7 +135,6 @@ $("#updateFilter").on("click", function() {
 // does ajax call/return to get the all reports from the mysql db
 // if the report already exists (by gps_id) it will not push it on the array
 function getAllReports() {
-        print.innerHtml = "getreportcal"
         var getreports = "getreports";
 	$.ajax({
         type: "POST",
@@ -203,7 +226,7 @@ function showReports() {
       var div = $("<div></div>");
       $(div).attr("id",reports[i].id.toString());
 
-      var id = $("<p></p>").text("ID: "+ reports[i].id);
+      var id = $("<p></p>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp);
       var timestamp = $("<p></p>").text("Timestamp: " + reports[i].timestamp);
       var name = $("<p></p>").text("Name: "+ reports[i].name);
       var text = $("<p></p>").text("Text: "+ reports[i].text);
@@ -232,6 +255,11 @@ function showReports() {
 }
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
+       for(var i = 0; i < markers.length; i ++ ) {
+           markers[i].setIcon(greenIcon);
+        }
+        centerMarker.setIcon(orangeIcon);
+        centerMarker.update();
         mymap.setView(centerMarker._latlng,13,{animate: true, 
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
        // mymap.setZoom(15);
@@ -266,9 +294,22 @@ function deleteData(id) {
 //keeps track of markers created using the mysql id in the markers array
 //will not create already created markers
 function createMarkers() {
-   for(var i = 0; i < reports.length; i ++) {
+   var cluster = L.markerClusterGroup();
       if(!hasMarker(reports[i].id)) {
-         var marker = L.marker([reports[i].lat, reports[i].long],{title:reports[i].id , autoPan : false, keepInView : false}).addTo(mymap);
+         var marker = L.marker([reports[i].lat, reports[i].long],{icon:greenIcon, title:reports[i].id , autoPan : false, keepInView : false});
+         marker.on('popupopen',function(e) {
+            for(var i = 0; i < markers.length; i ++ ) {
+               markers[i].setIcon(greenIcon);
+            }
+            e.target.setIcon(orangeIcon);
+            console.log(e.target);
+   var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
+   var newPoint = mymap.unproject(targetPoint, 15);
+        mymap.setView(newPoint, 15);
+       // mymap.panTo(newPoint);
+     //   mymap.setZoomAround(newPoint, 15);
+         });
+         marker.addTo(mymap);
          markerBind(marker, reports[i]);
          markers.push(marker);
          console.log(marker);
