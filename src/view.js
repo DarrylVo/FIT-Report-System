@@ -8,6 +8,7 @@ var reports = [];
 var markers = [];
 var print = document.getElementById("print");
 var refreshId = -1;
+var cluster = L.markerClusterGroup();
 
 //map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -171,7 +172,7 @@ function clearLocalData() {
       for(var i = 0; i < reports.length; i ++) {
          var id = reports[i].id;
          $("#"+id).remove();
-         mymap.removeLayer(findMarker(id));
+         cluster.removeLayer(findMarker(id));
 
       }
       reports.length = 0;
@@ -294,7 +295,7 @@ function deleteData(id) {
 //keeps track of markers created using the mysql id in the markers array
 //will not create already created markers
 function createMarkers() {
-   var cluster = L.markerClusterGroup();
+   for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
          var marker = L.marker([reports[i].lat, reports[i].long],{icon:greenIcon, title:reports[i].id , autoPan : false, keepInView : false});
          marker.on('popupopen',function(e) {
@@ -309,13 +310,14 @@ function createMarkers() {
        // mymap.panTo(newPoint);
      //   mymap.setZoomAround(newPoint, 15);
          });
-         marker.addTo(mymap);
+        // marker.addTo(mymap);
          markerBind(marker, reports[i]);
          markers.push(marker);
          console.log(marker);
+        cluster.addLayer(marker);
       }
    }
-
+   mymap.addLayer(cluster);
    print.innerHTML = "created map markers";
 
 }
