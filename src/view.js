@@ -8,8 +8,23 @@ var reports = [];
 var markers = [];
 var print = document.getElementById("print");
 var refreshId = -1;
-var cluster = L.markerClusterGroup();
-
+var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
+              var children = cluster.getAllChildMarkers();
+               for(var i = 0; i < children.length; i ++) {
+                   if(children[i].options.icon.options.iconUrl == "images/blu-circle.png")
+		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-large', iconSize: new L.Point(40, 40) });
+                      
+                }
+		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-small', iconSize: new L.Point(40, 40) });
+	}}  );
+/*
+cluster.on('clusterclick', function(a) {
+   console.log(a);
+            var targetPoint = mymap.project(a.latlng, 15).subtract([0, 175]);
+            var newPoint = mymap.unproject(targetPoint, 15);
+            //mymap.setView(newPoint, 15);
+});*/
+//cluster.on('animationend',function(a){a.target._featureGroup._layers[52].spiderfy();});
 //map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -17,6 +32,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
     id: 'rosglue.0fng9eaj',
     accessToken: 'pk.eyJ1Ijoicm9zZ2x1ZSIsImEiOiJjaXBzbDkzdXcwM3c1ZmttMjhyNzR1bmVxIn0.g45wbGBB5SprrAES2ju06Q'
 }).addTo(mymap);
+	mymap.addLayer(cluster);
 
 //custom icon
 var LeafIcon = L.Icon.extend({
@@ -30,9 +46,8 @@ var LeafIcon = L.Icon.extend({
     }
 });
 
-var greenIcon = new LeafIcon({iconUrl: 'images/red-circle.png'});
-var orangeIcon = new LeafIcon({iconUrl: 'images/blu-circle.png'});
-var redIcon = new LeafIcon({iconUrl: 'images/leaf-red.png'});
+var redIcon = new LeafIcon({iconUrl: 'images/red-circle.png'});
+var blueIcon = new LeafIcon({iconUrl: 'images/blu-circle.png'});
 
 //map callback stuff. this one centers the map on the marker popup when clicked on.
 //this callback function is attached directly to the map, not the marke!
@@ -233,8 +248,15 @@ function showReports() {
       var text = $("<p></p>").text("Text: "+ reports[i].text);
       var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
-                                                                  deleteData(e.data);
-                                                                });
+        // deleteData(e.data);
+        $("#dialog-confirm").dialog({
+          modal : true,
+          buttons : {
+                      "Delete this Report" : function() {deleteData(e.data);
+                                                  $(this).dialog("close");},
+                      "Cancel" : function () { $(this).dialog("close");}}
+          });
+       });
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                       });
@@ -247,7 +269,13 @@ function showReports() {
       div.append(id); 
       div.append(innerDiv);
       $("#report").append(div);
-      div.accordion({collapsible:true, active : false});
+      div.accordion({collapsible:true, active : false,
+         activate: function( event, ui ) {
+         console.log("accordion clicked on");
+           if(!$.isEmptyObject(ui.newHeader.offset())) {
+				$('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
+			}
+			  }});
         
    }
 
@@ -257,12 +285,13 @@ function showReports() {
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
        for(var i = 0; i < markers.length; i ++ ) {
-           markers[i].setIcon(greenIcon);
+           markers[i].setIcon(redIcon);
         }
-        centerMarker.setIcon(orangeIcon);
+        centerMarker.setIcon(blueIcon);
         centerMarker.update();
         mymap.setView(centerMarker._latlng,13,{animate: true, 
                                                       pan: {duration : 0.25, easeLinearity : 0.25  }   });
+        cluster.refreshClusters();
        // mymap.setZoom(15);
      //   mymap.panTo(centerMarker._latlng);
          //   centerMarker.openPopup();
@@ -273,7 +302,7 @@ function zoomOnMarker(centerMarker) {
 function deleteData(id) {
    console.log(id);
    $("#"+id).remove();
-   mymap.removeLayer(findMarker(id));
+   cluster.removeLayer(findMarker(id));
 
    if(removeReport(id))
       console.log("succ");
@@ -295,20 +324,25 @@ function deleteData(id) {
 //keeps track of markers created using the mysql id in the markers array
 //will not create already created markers
 function createMarkers() {
+   var flag = 0;
    for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
-         var marker = L.marker([reports[i].lat, reports[i].long],{icon:greenIcon, title:reports[i].id , autoPan : false, keepInView : false});
-         marker.on('popupopen',function(e) {
+         var marker = L.marker([reports[i].lat, reports[i].long],{icon:redIcon, title:reports[i].id , autoPan : false, keepInView : false});
+         marker.on('click',function(e) {
             for(var i = 0; i < markers.length; i ++ ) {
-               markers[i].setIcon(greenIcon);
+               markers[i].setIcon(redIcon);
             }
-            e.target.setIcon(orangeIcon);
+            e.target.setIcon(blueIcon);
             console.log(e.target);
-   var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
-   var newPoint = mymap.unproject(targetPoint, 15);
-        mymap.setView(newPoint, 15);
+
+           cluster.refreshClusters();
+            var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
+            var newPoint = mymap.unproject(targetPoint, 15);
+            mymap.setView(newPoint, 15);
+            $('#'+e.target.options.title).accordion("option", "active", 2);   
        // mymap.panTo(newPoint);
      //   mymap.setZoomAround(newPoint, 15);
+         
          });
         // marker.addTo(mymap);
          markerBind(marker, reports[i]);
@@ -317,7 +351,7 @@ function createMarkers() {
         cluster.addLayer(marker);
       }
    }
-   mymap.addLayer(cluster);
+//   mymap.addLayer(cluster);
    print.innerHTML = "created map markers";
 
 }
