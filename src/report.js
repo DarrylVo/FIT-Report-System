@@ -1,10 +1,6 @@
-
-
 //global var for coordinates
 var coords = new Array(2);
 var globalForm;
-
-
 
 //sends a randomly located report to the server using ajax calls
 //TODO: make this thing generate a full on report, possibly with cat pics
@@ -35,34 +31,10 @@ function updateNames() {
               var names_json = jQuery.parseJSON(data);
               for(var i = 0; i < names_json.length; i++) {
                  $("#cname").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
-
               }
            }   
        })
-
 }
-
-
-
-/*
-//shows a thumbnail of the picture 
-function imageIsLoaded(e) {
-    $('#myImg').attr('src', e.target.result);
-};
-
-
-//Jquery function call that will listen for picture uploads and then updates thumbnail
-$(function () {
-    $(":file").change(function () {
-        if (this.files && this.files[0]) {
-            var reader = new FileReader();
-            reader.onload = imageIsLoaded;
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-});
-*/
-
 
 //jquery call to do form validation for the register name form
 $("#registerForm").validate({
@@ -119,15 +91,11 @@ var cname = $("#cname option:selected").text();
          console.log("start check");
      globalForm = form;
      if (navigator.geolocation) {
-
         navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION TO SUBMIT REPORT");});
-         console.log("geo location enabled");
      } 
      else { 
           alert("geolocation not supported, will not save report gps coordinates");
        }
-
-
 }
 
 //callback to geolocation api save coordinates

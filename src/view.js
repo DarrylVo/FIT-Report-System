@@ -6,7 +6,6 @@
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
 var reports = [];
 var markers = [];
-var print = document.getElementById("print");
 var refreshId = -1;
 var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
               var children = cluster.getAllChildMarkers();
@@ -18,14 +17,6 @@ var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
 		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-small', iconSize: new L.Point(40, 40) });
 	}}  );
 
-/*
-cluster.on('clusterclick', function(a) {
-   console.log(a);
-            var targetPoint = mymap.project(a.latlng, 15).subtract([0, 175]);
-            var newPoint = mymap.unproject(targetPoint, 15);
-            //mymap.setView(newPoint, 15);
-});*/
-//cluster.on('animationend',function(a){a.target._featureGroup._layers[52].spiderfy();});
 //map creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -35,14 +26,13 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 }).addTo(mymap);
 	mymap.addLayer(cluster);
 
-//custom icon
+//custom icon stuff
 var LeafIcon = L.Icon.extend({
     options: {
      //   shadowUrl: 'images/leaf-shadow.png',
         iconSize:     [38, 38],
       //  shadowSize:   [50, 64],
         iconAnchor:   [22, 40],
-        shadowAnchor: [4, 38],
         popupAnchor:  [-3, -38]
     }
 });
@@ -50,23 +40,6 @@ var LeafIcon = L.Icon.extend({
 var redIcon = new LeafIcon({iconUrl: 'images/red-circle.png'});
 var blueIcon = new LeafIcon({iconUrl: 'images/blu-circle.png'});
 
-//map callback stuff. this one centers the map on the marker popup when clicked on.
-//this callback function is attached directly to the map, not the marke!
-//should it be attached to the marker or the map???
-/*
-mymap.on('popupopen', function(centerMarker) {
-       for(var i = 0; i < markers.length; i ++ ) {
-           markers[i].setIcon(greenIcon);
-        }
-        centerMarker.popup.setIcon(orangeIcon);
-console.log(centerMarker.popup);
-   var targetPoint = mymap.project(centerMarker.popup._latlng, 15).subtract([0, 150]);
- var newPoint = mymap.unproject(targetPoint, 15);
-       mymap.setView(newPoint, 15);
-       // mymap.panTo(newPoint);
-     //   mymap.setZoomAround(newPoint, 15);
-    });
-*/
 //jquery calls for ui init
 $("#filter1").datepicker();
 $("#filter1").datepicker("option", "dateFormat", "yy-mm-dd").attr("disabled",true);
@@ -92,10 +65,10 @@ $("#all").on("click",function() {
    clearLocalData();
    if(refreshId != -1) {
       window.clearInterval(refreshId);
-      refreshId = window.setInterval(getAllReports, 2000);
+      refreshId = window.setInterval(getAllReports, 3000);
    }
    else
-      refreshId = window.setInterval(getAllReports, 2000);
+      refreshId = window.setInterval(getAllReports, 3000);
    $("#filter1").attr("disabled",true); 
    $("#filter2").attr("disabled",true); 
    $("#realtime").checkboxradio("option","disabled",true); 
@@ -131,12 +104,12 @@ $("#updateFilter").on("click", function() {
          if(refreshId != -1) {
             window.clearInterval(refreshId);
             clearLocalData();
-           refreshId =  window.setInterval(getFilteredReports, 2000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
 
          }
          else {
             clearLocalData();
-           refreshId =  window.setInterval(getFilteredReports, 2000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
 
          } 
          
@@ -164,40 +137,39 @@ function getAllReports() {
         url: "src/view.php",
         data:{ getreports : getreports }, 
         success: function(data) {
-          
+           storeReports(data); 
+           //the call is here because ajax is asynchronous. this guarantees these functions are ONLy run after the ajax call ends
+           showReports();
+           createMarkers();
+       }  
+       })
+
+}
+
+//helper function to store requested data from mysql database into objects
+function storeReports(data) {
            var coord_json = jQuery.parseJSON(data);
            for(var i = 0; i < coord_json.length; i ++) {
-              var rep = {"id" : parseInt(coord_json[i].gps_id),
+              if(!hasReport(parseInt(coord_json[i].gps_id))) {
+                 var rep = {"id" : parseInt(coord_json[i].gps_id),
                          "lat" : parseFloat(coord_json[i].gps_lat), 
                          "long" : parseFloat(coord_json[i].gps_long),
                          "text" : coord_json[i].gps_text,  
                          "ext" : coord_json[i].gps_ext,
                          "name" : coord_json[i].gps_name,
                          "timestamp" : coord_json[i].gps_timestamp}; 
-              if(!hasReport(rep.id)) {
                  reports.push(rep);  
-                 console.log(rep);
+                 //console.log(rep);
               }
            }
-           //the call is here because ajax is asynchronous. this guarantees these functions are ONLy run after the ajax call ends
-           showReports();
-           createMarkers();
-           print.innerHTML = "got reports from mysql";
-       }  
-       })
 
 }
 
+
 //helper function to clear out local report data
 function clearLocalData() {
-      console.log("clearing all local data");
-      
-      for(var i = 0; i < reports.length; i ++) {
-         var id = reports[i].id;
-      //   $("#"+id).remove();
-         cluster.removeLayer(findMarker(id));
-
-      }
+      //console.log("clearing all local data");
+      cluster.clearLayers(); 
       $("#report").empty();
       $("#report").accordion("refresh");
       reports.length = 0;
@@ -209,37 +181,18 @@ function clearLocalData() {
 //TODO: give a better name, like getcertainreports or some shit
 function getFilteredReports(leftDate, rightDate) {
 
-  
-   
-
    var range = [ leftDate, rightDate];
-
-	$.ajax({
-        type: "POST",
-        url: "src/view.php",
-        data:{ range : range }, 
-        success: function(data) {
-          
-           var coord_json = jQuery.parseJSON(data);
-           for(var i = 0; i < coord_json.length; i ++) {
-              var rep = {"id" : parseInt(coord_json[i].gps_id),
-                         "lat" : parseFloat(coord_json[i].gps_lat), 
-                         "long" : parseFloat(coord_json[i].gps_long),
-                         "text" : coord_json[i].gps_text,  
-                         "ext" : coord_json[i].gps_ext,
-                         "name" : coord_json[i].gps_name,
-                         "timestamp" : coord_json[i].gps_timestamp}; 
-              if(!hasReport(rep.id)) {
-                 reports.push(rep);  
-                 console.log(rep);
-              }
-           }
-           //if ur wondering why this is here, look at the comments for getAllReports()
-           showReports();
-           createMarkers();
-           print.innerHTML = "got filtered reports from mysql";
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ range : range }, 
+      success: function(data) {
+         storeReports(data);
+         //if ur wondering why this is here, look at the comments for getAllReports()
+         showReports();
+         createMarkers();
        }  
-       })
+       });
 } 
 
 //shows all reports in the global reports[] array by doing a jquery select element
@@ -249,7 +202,7 @@ function getFilteredReports(leftDate, rightDate) {
 // on marker click. There probably is a better way to do that(like setting a marker field when i create an accordion section for the 
 // marker), but im lazy 
 function showReports() {
-
+   var flag = 0;
    for(var i = 0; i < reports.length; i++) {
       if(hasMarker(reports[i].id))
          continue;
@@ -275,8 +228,10 @@ function showReports() {
                                                                      }); 
       div.append(name,timestamp,text,zoom,del);
       $("#report").append(section, div);
+      flag = 1;
    }
-   $("#report").accordion("refresh");
+   if(flag == 1)
+      $("#report").accordion("refresh");
 
 }
 //zooms in on the marker and opens the attached popup bubble 
@@ -297,7 +252,7 @@ function zoomOnMarker(centerMarker) {
 //deletes the report and marker with this id. removes it from the map too, marker and the sidebar.
 //also does ajax call to make the server delete it from the mysql database
 function deleteData(id) {
-   console.log(id);
+   //console.log(id);
    $("#"+id).remove();
    $("#a"+id).remove();
    $("#report").accordion("refresh");
@@ -305,26 +260,23 @@ function deleteData(id) {
    cluster.removeLayer(findMarker(id));
 
    if(removeReport(id))
-      console.log("succ");
+      //console.log("succ");
    if(removeMarker(id)) 
-      console.log("succccc");
-
-	$.ajax({
-        type: "POST",
-        url: "src/view.php",
-        data:{ id : id }, 
-        success: function(data) {
-           console.log(data);
-        }
-        });
+      //console.log("succccc");
+   
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ id : id }, 
+      success: function(data) {
+         //console.log(data);
+    }});
 }
 
   
 //create markers on the map from the report array
 //keeps track of markers created using the mysql id in the markers array
-//will not create already created markers
 function createMarkers() {
-   var flag = 0;
    for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
          var marker = L.marker([reports[i].lat, reports[i].long],{icon:redIcon, title:reports[i].id , autoPan : false, keepInView : false});
@@ -333,29 +285,23 @@ function createMarkers() {
                markers[i].setIcon(redIcon);
             }
             e.target.setIcon(blueIcon);
-            console.log(e.target);
+           // console.log(e.target);
 
            cluster.refreshClusters();
             var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
             var newPoint = mymap.unproject(targetPoint, 15);
             mymap.setView(newPoint, 15);
             var index = $('#' + e.target.options.title).val();
-            console.log(index);
+            //console.log(index);
             $("#report").accordion("option", "active", parseInt(index)); 
-                  
-       // mymap.panTo(newPoint);
-     //   mymap.setZoomAround(newPoint, 15);
          
          });
-        // marker.addTo(mymap);
          markerBind(marker, reports[i]);
          markers.push(marker);
-         console.log(marker);
+         //console.log(marker);
         cluster.addLayer(marker);
       }
    }
-//   mymap.addLayer(cluster);
-   print.innerHTML = "created map markers";
 
 }
 
@@ -381,16 +327,6 @@ function markerBind(marker, report) {
    } 
    div = $("<div></div>").append(lat,time,name,text, link);
    marker.bindPopup(div.html());
-/*
-   marker.bindPopup("Latitude: " +report.lat +"<br>" 
-                    + "Longitude: " + report.long +"<br>"
-                    + "Timestamp: " + report.timestamp +"<br>"
-                    + "Name: " + report.name + "<br>"
-                    + "Text: " + report.text +"<br>"
-                    +  '<a href = "pic/' + report.id + "." + report.ext + '" data-lightbox = "image1" >' +   ' <img width = "50" height = "50" src=' + src +  '></img><br>'    +   '</a>'
-                     
-                    );
-*/
 }
 
 
