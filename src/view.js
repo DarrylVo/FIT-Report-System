@@ -17,6 +17,7 @@ var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
                 }
 		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-small', iconSize: new L.Point(40, 40) });
 	}}  );
+
 /*
 cluster.on('clusterclick', function(a) {
    console.log(a);
@@ -77,6 +78,12 @@ $("#realtime").checkboxradio();
 $("#realtime").checkboxradio("option","disabled",true);
 $("#updateFilter").button();
 $("#updateFilter").button("option","disabled",true);
+   $("#report").accordion({collapsible:true,
+         activate: function( event, ui ) {
+           if(!$.isEmptyObject(ui.newHeader.offset())) {
+                                $('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
+                        }
+                          }});
 
 //set onlick event handler for the ui stuff
 
@@ -183,13 +190,16 @@ function getAllReports() {
 
 //helper function to clear out local report data
 function clearLocalData() {
-
+      console.log("clearing all local data");
+      
       for(var i = 0; i < reports.length; i ++) {
          var id = reports[i].id;
-         $("#"+id).remove();
+      //   $("#"+id).remove();
          cluster.removeLayer(findMarker(id));
 
       }
+      $("#report").empty();
+      $("#report").accordion("refresh");
       reports.length = 0;
       markers.length = 0
 
@@ -234,14 +244,17 @@ function getFilteredReports(leftDate, rightDate) {
 
 //shows all reports in the global reports[] array by doing a jquery select element
 //attaches callback functions to the created elements to zoom and delete
+//TODO: the way the accordion sidebar is created is technically wrong- im basiclaly creating a new accordion for each section,
+// when it should be one accordion with many sections. however this way each accordion is unique, so i can handle the accordion popup
+// on marker click. There probably is a better way to do that(like setting a marker field when i create an accordion section for the 
+// marker), but im lazy 
 function showReports() {
 
    for(var i = 0; i < reports.length; i++) {
       if(hasMarker(reports[i].id))
          continue;
-      var div = $("<div></div>");
-      $(div).attr("id",reports[i].id.toString());
-
+      var div = $("<div>").attr("id", reports[i].id.toString()).val(i);
+      var section = $("<h3>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp).attr("id", 'a'+reports[i].id.toString())
       var id = $("<p></p>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp);
       var timestamp = $("<p></p>").text("Timestamp: " + reports[i].timestamp);
       var name = $("<p></p>").text("Name: "+ reports[i].name);
@@ -259,27 +272,11 @@ function showReports() {
        });
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
-                                                                      });
-      var innerDiv = $("<div></div>").append(name,timestamp,text,zoom,del);
-     /* div.append(name);
-      div.append(text);
-      div.append(zoom);
-      div.append(del);*/
-      div.attr("class","content");
-      div.append(id); 
-      div.append(innerDiv);
-      $("#report").append(div);
-      div.accordion({collapsible:true, active : false,
-         activate: function( event, ui ) {
-         console.log("accordion clicked on");
-           if(!$.isEmptyObject(ui.newHeader.offset())) {
-				$('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
-			}
-			  }});
-        
+                                                                     }); 
+      div.append(name,timestamp,text,zoom,del);
+      $("#report").append(section, div);
    }
-
-
+   $("#report").accordion("refresh");
 
 }
 //zooms in on the marker and opens the attached popup bubble 
@@ -302,6 +299,9 @@ function zoomOnMarker(centerMarker) {
 function deleteData(id) {
    console.log(id);
    $("#"+id).remove();
+   $("#a"+id).remove();
+   $("#report").accordion("refresh");
+   $("#report").accordion("option","active",false);
    cluster.removeLayer(findMarker(id));
 
    if(removeReport(id))
@@ -329,7 +329,7 @@ function createMarkers() {
       if(!hasMarker(reports[i].id)) {
          var marker = L.marker([reports[i].lat, reports[i].long],{icon:redIcon, title:reports[i].id , autoPan : false, keepInView : false});
          marker.on('click',function(e) {
-            for(var i = 0; i < markers.length; i ++ ) {
+            for(var i = 0; i < markers.length; i ++) {
                markers[i].setIcon(redIcon);
             }
             e.target.setIcon(blueIcon);
@@ -339,7 +339,10 @@ function createMarkers() {
             var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
             var newPoint = mymap.unproject(targetPoint, 15);
             mymap.setView(newPoint, 15);
-            $('#'+e.target.options.title).accordion("option", "active", 2);   
+            var index = $('#' + e.target.options.title).val();
+            console.log(index);
+            $("#report").accordion("option", "active", parseInt(index)); 
+                  
        // mymap.panTo(newPoint);
      //   mymap.setZoomAround(newPoint, 15);
          
