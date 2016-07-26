@@ -225,7 +225,11 @@ function showReports() {
                                                   $(this).dialog("close");},
                       "Cancel" : function () { $(this).dialog("close");}}
           });
-       });
+       });/*
+      if(getCookie('username') == "user") {
+         del.button("disable");
+
+      }*/
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                      }); 
@@ -237,6 +241,17 @@ function showReports() {
       $("#report").accordion("refresh");
 
 }
+
+function getCookie(cName) {
+    var cVal = document.cookie.match('(?:^|;) ?' + cName + '=([^;]*)(?:;|$)');
+    if (!cVal) {
+      return "no find";
+    } else {
+      return cVal[1];
+    }
+}
+
+
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
        for(var i = 0; i < markers.length; i ++ ) {
