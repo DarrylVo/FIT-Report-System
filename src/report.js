@@ -59,8 +59,10 @@ function registerName(form) {
         url : 'src/report.php',
         type : 'POST',
         success : function(data) {
-           console.log(data);
-           window.location = "http://scvwdflood.org/report.html";
+           if(data == "error")
+              alert("Name Already exists! Pick something else.");
+           else
+              window.location = "http://scvwdflood.org/report.html";
         }
      });   
 

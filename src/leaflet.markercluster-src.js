@@ -758,6 +758,9 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
                            this._map.addOneTimeEventListener('click', function() {
                               zoomCluster.setOpacity(1);
                            });
+                           this._map.addOneTimeEventListener('zoomstart', function() {
+                              zoomCluster.setOpacity(1);
+                           });
                           //setTimeout(function(e){e.spiderfy()},200,cluster); 
 			}
 		} else if (this.options.zoomToBoundsOnClick) {

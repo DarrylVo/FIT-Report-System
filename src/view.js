@@ -1,12 +1,13 @@
 //btw if you are confused about report id vs marker title, they are basically the same thing
 //marker only has one field that i can set as an id, which is called the "title" in the marker object. 
 
-
-//grabs references in the html 
+//map stuff
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
+//stores reports from mysql and map markers
 var reports = [];
 var markers = [];
 var refreshId = -1;
+//intializes marker clusters
 var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
               var children = cluster.getAllChildMarkers();
                for(var i = 0; i < children.length; i ++) {
@@ -29,9 +30,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 //custom icon stuff
 var LeafIcon = L.Icon.extend({
     options: {
-     //   shadowUrl: 'images/leaf-shadow.png',
         iconSize:     [38, 38],
-      //  shadowSize:   [50, 64],
         iconAnchor:   [22, 40],
         popupAnchor:  [-3, -38]
     }
@@ -51,16 +50,14 @@ $("#realtime").checkboxradio();
 $("#realtime").checkboxradio("option","disabled",true);
 $("#updateFilter").button();
 $("#updateFilter").button("option","disabled",true);
-   $("#report").accordion({collapsible:true,
-         activate: function( event, ui ) {
-           if(!$.isEmptyObject(ui.newHeader.offset())) {
-                                $('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
-                        }
-                          }});
+$("#report").accordion({collapsible:true, 
+   activate: function( event, ui ) {
+      if(!$.isEmptyObject(ui.newHeader.offset())) {
+         $('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
+      }}});
 
-//set onlick event handler for the ui stuff
 
-//on "Show All" click, activate polling and disable filter boxes
+//on "Show All" radiobox check, activate polling and disable filter boxes
 $("#all").on("click",function() {
    clearLocalData();
    if(refreshId != -1) {
@@ -70,19 +67,21 @@ $("#all").on("click",function() {
    else
       refreshId = window.setInterval(getAllReports, 3000);
    $("#filter1").attr("disabled",true); 
-   $("#filter2").attr("disabled",true); 
-   $("#realtime").checkboxradio("option","disabled",true); 
+   $("#filter2").attr("disabled",true);
+   $("#realtime").prop("checked",false);
+   $("#realtime").checkboxradio('refresh');
+   $("#realtime").checkboxradio("option","disabled",true);
    $("#updateFilter").button("option","disabled",true);
 });
 
 
-//on "Filter by Date" click, deactivate polling and reactivate filter boxes
+//on "Filter by Date" radiobox check, deactivate polling and reactivate filter boxes
 $("#filter").on("click", function() {
    window.clearInterval(refreshId);
    refreshId = -1;
    $("#filter1").attr("disabled",false); 
    $("#filter2").attr("disabled",false); 
-   $("#realtime").checkboxradio("option","disabled",false); 
+   $("#realtime").checkboxradio("option","disabled",false);
    $("#updateFilter").button("option","disabled",false);
 });
 
@@ -114,15 +113,19 @@ $("#updateFilter").on("click", function() {
          } 
          
      }
-     else if($("filter2").datepicker("getDate")!=null) { 
+     else if($("#filter2").datepicker("getDate")!=null) { 
          if(refreshId != -1) {
             window.clearInterval(refreshId);
             refreshId = -1;
          }
         clearLocalData();
         getFilteredReports('"'+$("#filter1").val()+'"', '"'+$("#filter2").val() + ' 23:59:59"');
-     }  
- }
+     }
+     else
+        $("<div>").dialog({title : "Error"}).append($("<p>").text("Filter options are improperly filled out"));
+  }
+  else
+     $("<div>").dialog({title : "Error"}).append($("<p>").text("Filter options are improperly filled out"));
 
 });
 
@@ -162,7 +165,7 @@ function storeReports(data) {
                  //console.log(rep);
               }
            }
-
+           coord_json.length = 0;
 }
 
 

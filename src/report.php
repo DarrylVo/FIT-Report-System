@@ -190,16 +190,24 @@ else if(isset($_REQUEST['name'])){
 else if(isset($_REQUEST['namereg'])){
    $teamid = $_POST['teamid'];
    $name = $_POST['namereg'];
-   $sql_q = "INSERT INTO GPSCOORDS_TB2 ".
+   $checkResult = mysqli_query($mysqli, "SELECT * FROM GPSCOORDS_TB2 WHERE
+      gps_name = '$name' LIMIT 1");
+   $num_rows = mysqli_num_rows($checkResult);
+   if($num_rows > 0) {
+      echo "error";
+   } 
+   else {
+      $sql_q = "INSERT INTO GPSCOORDS_TB2 ".
             "(gps_teamid, gps_name)".
             "VALUES".
             "('$teamid', '$name')";
-   $result = mysqli_query($mysqli, $sql_q);
-   if(!$result) {
-      echo "error in registering name n stuff";
+      $result = mysqli_query($mysqli, $sql_q);
+      if(!$result) {
+         echo "error in registering name n stuff";
+      }
+      mysqli_free_result($result);
    }
-   mysqli_free_result($result);
-
+   mysqli_free_result($checkResult);
 }
 
 // on this POST, saves the random report
