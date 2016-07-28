@@ -110,5 +110,24 @@ else if(isset($_REQUEST['range'])){
    unset($arr);
 }
 
+else if(isset($_REQUEST['report'])) {
+
+   $report = $_POST['report'];
+   $name = '"'.$report['name'].'"';
+   $text = '"'.$report['text'].'"';
+   $timestamp = '"'.$report['timestamp'].'"';
+   $sql_q =  "UPDATE GPSCOORDS_TB1 SET gps_text =". $text . ", gps_name = " . $name . ", gps_timestamp = " . $timestamp . "WHERE gps_id=" . $report['id'];
+   $retval = mysqli_query( $mysqli, $sql_q);
+   if(! $retval ) {
+      printf("edit report error  error\n");
+      exit;
+   }
+
+   echo 'succ';
+   mysqli_free_result($retval); 
+}
+
+//On this POST, edit the 
+
 mysqli_close($mysqli);
 ?>

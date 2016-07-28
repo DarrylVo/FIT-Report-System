@@ -24,6 +24,15 @@
 <div hidden id="dialog-confirm" title="Delete This Report?">
   <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>This report will be removed from the map and permanently deleted from the database and cannot be recovered. Are you sure?</p>
 </div>
+<div hidden id="dialog-edit" title="Edit This Report?">
+  <label for = "name"> Name : </label>
+      <select id = "name" > 
+      </select><br>
+  <label for = "timestamp"> Timestamp : </label>
+  <input id = "timestamp" type = "text"> </input> <br>
+  <label for = "text"> Text : </label>
+  <textarea id="text" rows = "5" cols = "30"></textarea>
+</div>
 <div id="mapid"></div>
 
 <div id ="sidebar">
@@ -39,7 +48,8 @@
         <button id="updateFilter"> Update Filter </button> <br>
         <label for ="filter1"> From: </label>
         <input id = "filter1"></input><br>
-        <label for = "filter2"> To:   </label>
+        
+<label for = "filter2"> To:   </label>
         <input id = "filter2"></input>
         <label for = "realtime"> Realtime </label>
         <input type = "checkbox" name = "cbox1" id = "realtime"></input><br>

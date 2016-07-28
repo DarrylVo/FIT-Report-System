@@ -212,9 +212,9 @@ function showReports() {
       var div = $("<div>").attr("id", reports[i].id.toString()).val(i);
       var section = $("<h3>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp).attr("id", 'a'+reports[i].id.toString())
       var id = $("<p></p>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp);
-      var timestamp = $("<p></p>").text("Timestamp: " + reports[i].timestamp);
-      var name = $("<p></p>").text("Name: "+ reports[i].name);
-      var text = $("<p></p>").text("Text: "+ reports[i].text);
+      var timestamp = $("<p></p>").attr("id","sidebarTimestamp").text("Timestamp: " + reports[i].timestamp);
+      var name = $("<p></p>").attr("id","sidebarName").text("Name: "+ reports[i].name);
+      var text = $("<p></p>").attr("id","sidebarText").text("Text: "+ reports[i].text);
       var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
         // deleteData(e.data);
@@ -233,12 +233,86 @@ function showReports() {
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                      }); 
-      div.append(name,timestamp,text,zoom,del);
+      var edit = $("<button>").button({label:"Edit"});
+      edit.on("click", reports[i], function(e) {
+        // deleteData(e.data);
+        $("#dialog-edit").dialog({
+          modal : true,
+          title : "Edit This report",
+          minWidth : 350,
+          buttons : {
+                      "Edit" : function() {
+                                     /*            $("#"+e.data.id).children("#sidebarName").text("Name: " + $("#name").val()); 
+                                                 e.data.name = $("#name").val();
+                                                 $("#"+e.data.id).children("#sidebarText").text("Text: " + $("#text").val()); 
+                                                 e.data.text = $("#text").val();
+                                                 $("#"+e.data.id).children("#sidebarTimestamp").text("Timestamp: " + $("#timestamp").val()); 
+                                                 e.data.timestamp = $("#timestamp").val();*/
+                                                 editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val());
+                                                 //$("#markerName").text("Name: " +$("#name").val());
+                                               /*  var marker = findMarker(e.data.id);
+                                                 marker.unbindPopup();
+                                                 markerBind(marker,e.data);
+                                                 marker.update();
+                                                 marker.getPopup().update();
+                                                 marker.closePopup();
+                                                 marker.openPopup();*/
+                                                  $(this).dialog("close");},
+                      "Cancel" : function () { $(this).dialog("close");}}
+          });
+          //$("#name").val(e.data.name);
+          $('#timestamp').val(e.data.timestamp);
+          $('#text').val(e.data.text);
+        var getnames = "getnames";
+	$.ajax({
+           type: "POST",
+           url: "src/view.php",
+           data:{ getnames : getnames }, 
+           success: function(data) {
+              var names_json = jQuery.parseJSON(data);
+              for(var i = 0; i < names_json.length; i++) {
+                 $("#name").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
+              }
+              $("#name").val(e.data.name);
+           }   
+       })
+       });
+      
+
+
+      div.append(name,timestamp,text,zoom,del,edit);
       $("#report").append(section, div);
       flag = 1;
    }
    if(flag == 1)
       $("#report").accordion("refresh");
+
+}
+
+//edits the locally stored, then changes it in the mysql db via ajax call to php
+function editReport(report, name, timestamp, text) {
+   $("#"+report.id).children("#sidebarName").text("Name: " + name); 
+   report.name = name;
+   $("#"+report.id).children("#sidebarText").text("Text: " + text); 
+   report.text = text;
+   $("#"+report.id).children("#sidebarTimestamp").text("Timestamp: " + timestamp); 
+   report.timestamp = timestamp;
+
+   var marker = findMarker(report.id);
+   marker.unbindPopup();
+   markerBind(marker,report);
+   marker.update();
+   marker.getPopup().update();
+   marker.closePopup();
+   marker.openPopup();
+
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ report : report }, 
+      success: function(data) {
+         console.log(data);
+    }});
 
 }
 
@@ -328,7 +402,7 @@ function markerBind(marker, report) {
    var src = 'pic/' + report.id + "." + report.ext;
    var lat = $("<p></p>").text("Lat/Long: " + report.lat + ", " + report.long).css('line-height', '1em');
    var time = $("<p></p>").text("Timestamp: " + report.timestamp);
-   var name = $("<p></p>").text("name: " + report.name);
+   var name = $("<p></p>").attr("id", "markerName").text("name: " + report.name);
    var text = $("<p></p>").text("Text: " + report.text);
 
 
@@ -343,7 +417,7 @@ function markerBind(marker, report) {
       link.append($("<source></source>").attr("src",src).attr("type","video/mp4")); 
 
    } 
-   div = $("<div></div>").append(lat,time,name,text, link);
+   div = $("<div></div>").attr("id", "marker"+report.id).append(lat,name,time,text, link);
    marker.bindPopup(div.html());
 }
 
