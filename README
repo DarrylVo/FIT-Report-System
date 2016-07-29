@@ -19,17 +19,16 @@ if you got any questions, email me dvo03@calpoly.edu. I'll answer any questions 
 
 Libraries Used:
 Leaflet for maps
-leaflet cluster markers 
+leaflet cluster markers(NOTE- I edited the src file a little bit to fix some animations) 
 Lightbox for better picture viewing
 Jquery
 jquery validation plugin
 jquery form submit pugin
 getID3 to get out gps info from the videos/pictures
-
+Bootstrap for some of the login pages
 Mysql for database
 
 dont forget for the php.ini set so that bigger files can be POSTed.
-I also changed the cluster marker library so that the clusters would spiderfy on zoom.:w
 
 
 

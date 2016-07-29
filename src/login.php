@@ -1,31 +1,10 @@
 <?php
-//creates mysqli connection object...   
-/*
-$mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
-
-//if error kill urself
-if($mysqli->connect_errno) {
-   printf("Connect failed: %s\n", $mysqli->connect_error);
-   exit;
-}
-   
-   $user = "user";
-   $password = "user";
-   $hash = password_hash($password, PASSWORD_DEFAULT); 	
-
-   $sql_q = "INSERT INTO GPSCOORDS_TB3 ".
-       "(gps_user, gps_hash) ".
-       "VALUES ".
-       "('$user', '$hash')";
-   $result = mysqli_query($mysqli,$sql_q);
-   mysqli_free_result($result);
-
-   */
    session_start();
-   if( isset( $_SESSION['user'])) {
-      echo "autologin";
+   if(isset ($_REQUEST['auto'])) {
+      if( isset( $_SESSION['user'])) {
+         echo "autologin";
+      }
    }
-
    else if( isset($_REQUEST['info'])) {
       $info = $_POST['info'];
       if($info[0] == "admin" && password_verify($info[1], "\$2y$10\$rDSqMcybyFuWHTuJVuWsj.mSLaubnhYrbcOZ17ujur6QdV8FiWooC")) {
@@ -41,4 +20,5 @@ if($mysqli->connect_errno) {
       }
       else
          echo "failure";
-   } 
+   }
+?> 

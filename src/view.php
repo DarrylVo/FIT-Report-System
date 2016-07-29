@@ -6,7 +6,8 @@
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 
-   session_start();
+//starts the session for login stuff
+session_start();
 
 //if error kill urself
 if($mysqli->connect_errno) {
@@ -19,21 +20,19 @@ else if (isset($_REQUEST['status'])) {
    if(isset ($_SESSION['user'])) {
       echo $_SESSION['user']; 
    }
-
-
 }
 
 //logout- reset session data
 else if (isset($_REQUEST['logout']) && isset($_SESSION['user']) ) {
-$_SESSION = array();
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
-}
-session_destroy();
+   $_SESSION = array();
+   if (ini_get("session.use_cookies")) {
+      $params = session_get_cookie_params();
+      setcookie(session_name(), '', time() - 42000,
+      $params["path"], $params["domain"],
+      $params["secure"], $params["httponly"]
+      );
+   }
+   session_destroy();
    echo "wooo";
 }
 

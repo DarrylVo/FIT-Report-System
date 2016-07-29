@@ -1,70 +1,69 @@
-
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-        <meta charset="UTF-8">
-	<script src = "src/jquery-3.0.0.min.js"></script>
-	<script src="src/leaflet.js"></script>
-	<link rel="stylesheet" href="css/view.css" />
-	<link rel="stylesheet" href="css/lightbox.css" />
-	<link rel="stylesheet" href="css/jquery-ui.css" />
-	<link rel="stylesheet" href="css/jquery-ui.structure.css" />
-	<link rel="stylesheet" href="css/jquery-ui.theme.css" />
-	<script src="src/jquery-ui.js"></script>
-	<link rel="stylesheet" href="css/leaflet.css" />
-	<link rel="stylesheet" href="css/MarkerCluster.css" />
-	<link rel="stylesheet" href="css/MarkerCluster.Default.css" />
-	<script src="src/leaflet.markercluster-src.js"></script>
+   <meta charset="UTF-8">
+   <script src = "src/jquery-3.0.0.min.js"></script>
+   <script src="src/leaflet.js"></script>
+   <link rel="stylesheet" href="css/view.css" />
+   <link rel="stylesheet" href="css/lightbox.css" />
+   <link rel="stylesheet" href="css/jquery-ui.css" />
+   <link rel="stylesheet" href="css/jquery-ui.structure.css" />
+   <link rel="stylesheet" href="css/jquery-ui.theme.css" />
+   <script src="src/jquery-ui.js"></script>
+   <link rel="stylesheet" href="css/leaflet.css" />
+   <link rel="stylesheet" href="css/MarkerCluster.css" />
+   <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+   <script src="src/leaflet.markercluster-src.js"></script>
 </head>
 
 <body>
+
 <div hidden id="dialog-confirm" title="Delete This Report?">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>This report will be removed from the map and permanently deleted from the database and cannot be recovered. Are you sure?</p>
+   <p>
+   <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>
+   This report will be removed from the map and permanently deleted from the database and cannot be recovered. Are you sure?
+  </p>
 </div>
+
 <div hidden id="dialog-edit" title="Edit This Report?">
-  <label for = "name"> Name : </label>
-      <select id = "name" > 
-      </select><br>
-  <label for = "timestamp"> Timestamp : </label>
-  <input id = "timestamp" type = "text"> </input> <br>
-  <label for = "text"> Text : </label>
-  <textarea id="text" rows = "5" cols = "30"></textarea>
+   <label for = "name"> Name : </label>
+   <select id = "name" > </select><br>
+   <label for = "timestamp"> Timestamp : </label>
+   <input id = "timestamp" type = "text"> </input> <br>
+   <label for = "text"> Text : </label>
+   <textarea id="text" rows = "5" cols = "30"></textarea>
 </div>
+
 <div id="mapid"></div>
 
 <div id ="sidebar">
    <div id = "report"> </div>
 
    <div id = "buttons">
-     <fieldset>
-        <legend> Report Viewing Options </legend>
-        <label for="all"> Show All </label>
-        <input type = "radio" name = "radio1" id = "all">  </input><br>
-        <label for="filter"> Filter by Date </label>
-        <input type = "radio" name = "radio1" id = "filter">  </input>
-        <button id="updateFilter"> Update Filter </button> <br>
-        <label for ="filter1"> From: </label>
-        <input id = "filter1"></input><br>
+      <fieldset>
+         <legend> Report Viewing Options </legend>
+         <label for="all"> Show All </label>
+         <input type = "radio" name = "radio1" id = "all">  </input><br>
+         <label for="filter"> Filter by Date </label>
+         <input type = "radio" name = "radio1" id = "filter">  </input>
+         <button id="updateFilter"> Update Filter </button> <br>
+         <label for ="filter1"> From: </label>
+         <input id = "filter1"></input><br>
         
-<label for = "filter2"> To:   </label>
-        <input id = "filter2"></input>
-        <label for = "realtime"> Realtime </label>
-        <input type = "checkbox" name = "cbox1" id = "realtime"></input><br>
+         <label for = "filter2"> To:   </label>
+         <input id = "filter2"></input>
+         <label for = "realtime"> Realtime </label>
+         <input type = "checkbox" name = "cbox1" id = "realtime"></input><br>
 
-        <p hidden id = "print"></p>	
-<button id = "logout">Logout </button>
-    </fieldset>
+         <p hidden id = "print"></p>	
+         <button id = "logout">Logout </button>
+      </fieldset>
    </div>
 </div>
   
 <script src = "src/lightbox.js"> </script>
-
-</body>
-
 <script src = "src/view.js"> </script>
 
+</body>
 
 </html>

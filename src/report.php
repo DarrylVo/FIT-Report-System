@@ -71,6 +71,7 @@ else if(isset($_REQUEST['name'])){
            "VALUES ".
            "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
       }
+      //or no timestamp
       else {
           echo "found no timestamp";
         // var_dump($metaData['tags_html']['quicktime']);       
@@ -94,6 +95,7 @@ else if(isset($_REQUEST['name'])){
            "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
 
       }
+      //or no timestamp
       else {
          echo "didnt find timestamp";
          $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
@@ -172,16 +174,10 @@ else if(isset($_REQUEST['name'])){
    $file = $_FILES['pic']; 
    $fileContent = file_get_contents($file['tmp_name']);
 
-
    $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
    if(!$test)
       echo "couldnt open";
    fwrite($test, $fileContent);
-
-
-
-
-
    fclose($test);
         
 }
@@ -223,10 +219,7 @@ else if(isset($_REQUEST['rand'])){
       exit;
    }
    mysqli_free_result($result);
-
-
 }
-
 
 //on this post, gets all the names out of the mysql db table 2!
 
@@ -248,34 +241,6 @@ else if(isset($_REQUEST['getnames'])){
    unset($arr);
 }
 
-
 mysqli_close($mysqli);
-
-/*
-//functions to get gps data from exif instead of the report
-function getGps($exifCoord, $hemi) {
-
-    $degrees = count($exifCoord) > 0 ? gps2Num($exifCoord[0]) : 0;
-    $minutes = count($exifCoord) > 1 ? gps2Num($exifCoord[1]) : 0;
-    $seconds = count($exifCoord) > 2 ? gps2Num($exifCoord[2]) : 0;
-
-    $flip = ($hemi == 'W' or $hemi == 'S') ? -1 : 1;
-
-    return $flip * ($degrees + $minutes / 60 + $seconds / 3600);
-
-}
-
-function gps2Num($coordPart) {
-
-    $parts = explode('/', $coordPart);
-
-    if (count($parts) <= 0)
-        return 0;
-
-    if (count($parts) == 1)
-        return $parts[0];
-
-    return floatval($parts[0]) / floatval($parts[1]);
-}*/
 
 ?>

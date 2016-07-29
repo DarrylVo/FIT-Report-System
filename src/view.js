@@ -4,29 +4,34 @@ checkLoginStatus();
 
 //map stuff
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
+
 //stores reports from mysql and map markers
 var reports = [];
 var markers = [];
 var refreshId = -1;
+
 //intializes marker clusters
 var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
-              var children = cluster.getAllChildMarkers();
-               for(var i = 0; i < children.length; i ++) {
-                   if(children[i].options.icon.options.iconUrl == "images/blu-circle.png")
-		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-large', iconSize: new L.Point(40, 40) });
-                      
-                }
-		      return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', className: 'marker-cluster' + ' marker-cluster-small', iconSize: new L.Point(40, 40) });
-	}}  );
+   var children = cluster.getAllChildMarkers();
+   for(var i = 0; i < children.length; i ++) {
+      if(children[i].options.icon.options.iconUrl == "images/blu-circle.png")
+         return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + 
+           '</span></div>', className: 'marker-cluster' + ' marker-cluster-large', iconSize: new L.Point(40, 40) });                   
+   }
+   return new L.DivIcon({ html: '<div><span>' + cluster.getChildCount() + '</span></div>', 
+     className: 'marker-cluster' + ' marker-cluster-small', iconSize: new L.Point(40, 40) });
+}} );
 
-//map creation stuff
+//map tile creation stuff
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18,
     id: 'rosglue.0fng9eaj',
     accessToken: 'pk.eyJ1Ijoicm9zZ2x1ZSIsImEiOiJjaXBzbDkzdXcwM3c1ZmttMjhyNzR1bmVxIn0.g45wbGBB5SprrAES2ju06Q'
 }).addTo(mymap);
-	mymap.addLayer(cluster);
+	
+//add cluster to map
+mymap.addLayer(cluster);
 
 //custom icon stuff
 var LeafIcon = L.Icon.extend({
@@ -49,7 +54,16 @@ $("#all").checkboxradio();
 $("#filter").checkboxradio();
 $("#realtime").checkboxradio();
 $("#realtime").checkboxradio("option","disabled",true);
-$("#logout").button().on("click", logout);
+$("#logout").button().on("click", function() {
+   $("<div>").text("Do you wish to logout?").dialog({
+   title : "Logout",
+   buttons : {
+      "Logout" : logout,
+      "Cancel" : function () { $(this).dialog("close");}
+      } 
+   });
+
+});
 $("#updateFilter").button();
 $("#updateFilter").button("option","disabled",true);
 $("#report").accordion({collapsible:true, 
@@ -105,21 +119,18 @@ $("#updateFilter").on("click", function() {
          if(refreshId != -1) {
             window.clearInterval(refreshId);
             clearLocalData();
-           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
-
+            refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
          }
          else {
             clearLocalData();
-           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
-
+            refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
          } 
-         
      }
      else if($("#filter2").datepicker("getDate")!=null) { 
-         if(refreshId != -1) {
-            window.clearInterval(refreshId);
-            refreshId = -1;
-         }
+        if(refreshId != -1) {
+           window.clearInterval(refreshId);
+           refreshId = -1;
+        }
         clearLocalData();
         getFilteredReports('"'+$("#filter1").val()+'"', '"'+$("#filter2").val() + ' 23:59:59"');
      }
@@ -128,64 +139,56 @@ $("#updateFilter").on("click", function() {
   }
   else
      $("<div>").dialog({title : "Error"}).append($("<p>").text("Filter options are improperly filled out"));
-
 });
-
-                  
 
 // does ajax call/return to get the all reports from the mysql db
 // if the report already exists (by gps_id) it will not push it on the array
 function getAllReports() {
-        var getreports = "getreports";
-	$.ajax({
-        type: "POST",
-        url: "src/view.php",
-        data:{ getreports : getreports }, 
-        success: function(data) {
-           storeReports(data); 
-           //the call is here because ajax is asynchronous. this guarantees these functions are ONLy run after the ajax call ends
-           showReports();
-           createMarkers();
-       }  
-       })
-
+   var getreports = "getreports";
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ getreports : getreports }, 
+      success: function(data) {
+         storeReports(data); 
+         showReports();
+         createMarkers();
+      }  
+   });
 }
 
 //helper function to store requested data from mysql database into objects
 function storeReports(data) {
-           var coord_json = jQuery.parseJSON(data);
-           for(var i = 0; i < coord_json.length; i ++) {
-              if(!hasReport(parseInt(coord_json[i].gps_id))) {
-                 var rep = {"id" : parseInt(coord_json[i].gps_id),
-                         "lat" : parseFloat(coord_json[i].gps_lat), 
-                         "long" : parseFloat(coord_json[i].gps_long),
-                         "text" : coord_json[i].gps_text,  
-                         "ext" : coord_json[i].gps_ext,
-                         "name" : coord_json[i].gps_name,
-                         "timestamp" : coord_json[i].gps_timestamp}; 
-                 reports.push(rep);  
+   var coord_json = jQuery.parseJSON(data);
+   for(var i = 0; i < coord_json.length; i ++) {
+      if(!hasReport(parseInt(coord_json[i].gps_id))) {
+         var rep = { "id" : parseInt(coord_json[i].gps_id),
+           "lat" : parseFloat(coord_json[i].gps_lat), 
+           "long" : parseFloat(coord_json[i].gps_long),
+           "text" : coord_json[i].gps_text,  
+           "ext" : coord_json[i].gps_ext,
+           "name" : coord_json[i].gps_name,
+           "timestamp" : coord_json[i].gps_timestamp}; 
+         reports.push(rep);  
                  //console.log(rep);
-              }
-           }
-           coord_json.length = 0;
+      }
+   }
+   coord_json.length = 0;
 }
 
 
 //helper function to clear out local report data
 function clearLocalData() {
-      //console.log("clearing all local data");
-      cluster.clearLayers(); 
-      $("#report").empty();
-      $("#report").accordion("refresh");
-      reports.length = 0;
-      markers.length = 0
-
+   cluster.clearLayers(); 
+   $("#report").empty();
+   $("#report").accordion("refresh");
+   reports.length = 0;
+   markers.length = 0
 }
 
 //gets a subset of the reports indictated by left and right date
 //TODO: give a better name, like getcertainreports or some shit
 function getFilteredReports(leftDate, rightDate) {
-
    var range = [ leftDate, rightDate];
    $.ajax({
       type: "POST",
@@ -193,7 +196,6 @@ function getFilteredReports(leftDate, rightDate) {
       data:{ range : range }, 
       success: function(data) {
          storeReports(data);
-         //if ur wondering why this is here, look at the comments for getAllReports()
          showReports();
          createMarkers();
        }  
@@ -219,18 +221,16 @@ function showReports() {
       var text = $("<p></p>").attr("id","sidebarText").text("Text: "+ reports[i].text);
       var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
-        // deleteData(e.data);
-        $("#dialog-confirm").dialog({
-          modal : true,
-          buttons : {
-                      "Delete this Report" : function() {deleteData(e.data);
-                                                  $(this).dialog("close");},
-                      "Cancel" : function () { $(this).dialog("close");}}
+         $("#dialog-confirm").dialog({
+           modal : true,
+           buttons : {
+              "Delete this Report" : function() {deleteData(e.data);
+                                                 $(this).dialog("close");},
+              "Cancel" : function () { $(this).dialog("close");}}
           });
        });
       var zoom = $("<button></button>").button({label:"Zoom"});
-      zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
-                                                                     }); 
+      zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));}); 
       var edit = $("<button>").button({label:"Edit"});
       edit.on("click", reports[i], function(e) {
         // deleteData(e.data);
@@ -239,23 +239,8 @@ function showReports() {
           title : "Edit This report",
           minWidth : 350,
           buttons : {
-                      "Edit" : function() {
-                                     /*            $("#"+e.data.id).children("#sidebarName").text("Name: " + $("#name").val()); 
-                                                 e.data.name = $("#name").val();
-                                                 $("#"+e.data.id).children("#sidebarText").text("Text: " + $("#text").val()); 
-                                                 e.data.text = $("#text").val();
-                                                 $("#"+e.data.id).children("#sidebarTimestamp").text("Timestamp: " + $("#timestamp").val()); 
-                                                 e.data.timestamp = $("#timestamp").val();*/
-                                                 editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val());
-                                                 //$("#markerName").text("Name: " +$("#name").val());
-                                               /*  var marker = findMarker(e.data.id);
-                                                 marker.unbindPopup();
-                                                 markerBind(marker,e.data);
-                                                 marker.update();
-                                                 marker.getPopup().update();
-                                                 marker.closePopup();
-                                                 marker.openPopup();*/
-                                                  $(this).dialog("close");},
+                      "Edit" : function() { editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val());
+                                            $(this).dialog("close");},
                       "Cancel" : function () { $(this).dialog("close");}}
           });
           //$("#name").val(e.data.name);
@@ -275,12 +260,10 @@ function showReports() {
            }   
        })
        });
-      
       if(user == "user") {
          edit.button("disable");
          del.button("disable");
       }
-
       div.append(name,timestamp,text,zoom,del,edit);
       $("#report").append(section, div);
       flag = 1;
@@ -349,30 +332,17 @@ function checkLoginStatus() {
 
 
 }
-/*
-function getCookie(cName) {
-    var cVal = document.cookie.match('(?:^|;) ?' + cName + '=([^;]*)(?:;|$)');
-    if (!cVal) {
-      return "no find";
-    } else {
-      return cVal[1];
-    }
-}*/
-
 
 //zooms in on the marker and opens the attached popup bubble 
 function zoomOnMarker(centerMarker) {
-       for(var i = 0; i < markers.length; i ++ ) {
-           markers[i].setIcon(redIcon);
-        }
-        centerMarker.setIcon(blueIcon);
-        centerMarker.update();
-        mymap.setView(centerMarker._latlng,13,{animate: true, 
-                                                      pan: {duration : 0.25, easeLinearity : 0.25  }   });
-        cluster.refreshClusters();
-       // mymap.setZoom(15);
-     //   mymap.panTo(centerMarker._latlng);
-         //   centerMarker.openPopup();
+   for (var i = 0; i < markers.length; i ++ ) {
+      markers[i].setIcon(redIcon);
+   }
+   centerMarker.setIcon(blueIcon);
+   centerMarker.update();
+   mymap.setView(centerMarker._latlng,13,{animate: true, 
+     pan: {duration : 0.25, easeLinearity : 0.25  }   });
+   cluster.refreshClusters();
 }
 
 //deletes the report and marker with this id. removes it from the map too, marker and the sidebar.

@@ -718,10 +718,9 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		    bottomCluster = cluster;
                 var zoomCluster = cluster;
 		while (bottomCluster._childClusters.length === 1) {
-                      console.log(bottomCluster);
-                        if(bottomCluster._zoom == 15)
-                           zoomCluster = bottomCluster; 
-			bottomCluster = bottomCluster._childClusters[0];
+                   if(bottomCluster._zoom == 15)
+                      zoomCluster = bottomCluster; 
+                   bottomCluster = bottomCluster._childClusters[0];
 		}
                 if(zoomCluster == cluster) {
                    while(zoomCluster.__parent != null) {
@@ -732,26 +731,20 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
                 }
           
 		if (bottomCluster._zoom === this._maxZoom && bottomCluster._childCount === cluster._childCount) {
-                        //console.log("START HERE");
 			// All child markers are contained in a single cluster from this._maxZoom to this cluster.
 			if (this.options.spiderfyOnMaxZoom) {
-                          // this._map.off("zoomend");
                            this._map.off('zoomend', this._zoomEnd, this);
-                           //this._map.off('movend', this._zoomEnd, this);
                            var targetPoint = this._map.project(e.latlng, 15).subtract([0, 175]);
                            var newPoint = this._map.unproject(targetPoint, 15);
                            var point = this._map.project(e.latlng, 15).subtract([0, 176]);
                            var trollPoint = this._map.unproject(point, 15);
                            
-                           //console.log(cluster);
                            this._map.addOneTimeEventListener('moveend',function(a){
-                              //console.log('eventtrigger');
-                              //console.log(this);
-                               this._map.on('zoomend', this._zoomEnd, this);
+                              this._map.on('zoomend', this._zoomEnd, this);
                               e.layer.spiderfy();
                               this._myZoomEnd();
                               
-                              },this);
+                           },this);
                            this._map.setView(newPoint, 15);
                            this._map.setView(trollPoint, 15);
                            zoomCluster.setOpacity(0.3);
@@ -763,13 +756,14 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
                            });
                           //setTimeout(function(e){e.spiderfy()},200,cluster); 
 			}
-		} else if (this.options.zoomToBoundsOnClick) {
-			cluster.zoomToBounds();
+		} 
+                else if (this.options.zoomToBoundsOnClick) {
+	           cluster.zoomToBounds();
 		}
 
 		// Focus the map again for keyboard users.
 		if (e.originalEvent && e.originalEvent.keyCode === 13) {
-			this._map._container.focus();
+		   this._map._container.focus();
 		}
 	},
 
@@ -821,7 +815,6 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	},
 
 	_myZoomEnd: function () {
-                //console.log("zoomend trigger");
 		if (!this._map) { //May have been removed from the map by a zoomEnd handler
 			return;
 		}
@@ -953,11 +946,9 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 	//Merge and split any existing clusters that are too big or small
 	_mergeSplitClusters: function () {
-                //console.log("merge split clusters");
 		this._processQueue();
 
 		if (this._zoom < this._map._zoom && this._currentShownBounds.intersects(this._getExpandedVisibleBounds())) { //Zoom in, split
-		//console.log("here1");
 			this._animationStart();
 			//Remove clusters now off screen
 			this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, this._zoom, this._getExpandedVisibleBounds());
@@ -965,22 +956,18 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			this._animationZoomIn(this._zoom, this._map._zoom);
 
 		} else if (this._zoom > this._map._zoom) { //Zoom out, merge
-                        //console.log("here2");
 			this._animationStart();
 
 			this._animationZoomOut(this._zoom, this._map._zoom);
 		} else {
-                        //console.log("here3");
 			this._moveEnd();
 		}
 	},
 
 	_myMergeSplitClusters: function () {
-                //console.log("MY merge split clusters");
 		//this._processQueue();
 
 		if (this._zoom < this._map._zoom && this._currentShownBounds.intersects(this._getExpandedVisibleBounds())) { //Zoom in, split
-		//console.log("here1");
 			this._animationStart();
 			//Remove clusters now off screen
 		//	this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, this._zoom, this._getExpandedVisibleBounds());
@@ -989,12 +976,10 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
                          this._moveEnd();
 
 		} else if (this._zoom > this._map._zoom) { //Zoom out, merge
-                        //console.log("here2");
 			this._animationStart();
 
 			this._animationZoomOut(this._zoom, this._map._zoom);
 		} else {
-                        //console.log("here3");
 			//this._moveEnd();
 		}
 		
@@ -2244,7 +2229,6 @@ L.MarkerCluster.include({
 				leg.setStyle({opacity: finalLegOpacity});
 			}
 		}
-                //console.log("FUCKING OPACITY SET");
 		this.setOpacity(0.3);
 
 		setTimeout(function () {
@@ -2257,7 +2241,6 @@ L.MarkerCluster.include({
 	},
 
 	_animationUnspiderfy: function (zoomDetails) {
-                //console.log("UNSPIDERFY ANIMATION");
 		var me = this,
 			group = this._group,
 			map = group._map,
@@ -2270,7 +2253,6 @@ L.MarkerCluster.include({
 		group._animationStart();
 
 		//Make us visible and bring the child markers back in
-                //console.log("unopacitating");
 		this.setOpacity(1);
 		for (i = childMarkers.length - 1; i >= 0; i--) {
 			m = childMarkers[i];

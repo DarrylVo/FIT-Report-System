@@ -2,6 +2,7 @@
 var coords = new Array(2);
 var globalForm;
 
+
 //sends a randomly located report to the server using ajax calls
 //TODO: make this thing generate a full on report, possibly with cat pics
 function randomReport() {
@@ -21,19 +22,22 @@ function randomReport() {
 //updates the select drop down box with names from the mysql table 2
 //does this by doing ajax call/return from php
 function updateNames() {
-
-        var getnames = "getnames";
-	$.ajax({
-           type: "POST",
-           url: "src/report.php",
-           data:{ getnames : getnames }, 
-           success: function(data) {
-              var names_json = jQuery.parseJSON(data);
-              for(var i = 0; i < names_json.length; i++) {
-                 $("#cname").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
-              }
-           }   
-       })
+   var getnames = "getnames";
+   $.ajax({
+      type: "POST",
+      url: "src/report.php",
+      data:{ getnames : getnames }, 
+      success: function(data) {
+         var names_json = jQuery.parseJSON(data);
+         for(var i = 0; i < names_json.length; i++) {
+            $("#cname").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
+         }
+         var cookie = getCookie("name");
+         if(cookie!=null) {
+            $("#cname").val(cookie);
+         }
+      }   
+   });
 }
 
 //jquery call to do form validation for the register name form
@@ -49,24 +53,20 @@ $("#registerForm").validate({
      messages: {
           namereg : "Enter a name"
           }
-          });
+     });
 
 //callback function for validation for the register name form
-
 function registerName(form) {
-
    $(form).ajaxSubmit({
-        url : 'src/report.php',
-        type : 'POST',
-        success : function(data) {
-           if(data == "error")
-              alert("Name Already exists! Pick something else.");
-           else
-              window.location = "http://scvwdflood.org/report.html";
+      url : 'src/report.php',
+      type : 'POST',
+      success : function(data) {
+         if(data == "error")
+            alert("Name Already exists! Pick something else.");
+         else
+            window.location = "http://scvwdflood.org/report.html";
         }
      });   
-
-
 }
 
 
@@ -75,8 +75,8 @@ function registerName(form) {
 //callback function to get gps coords, then send all report data to server/php
 //TODO: i cant get it to only accept all video and all image mimetypes, ill just leave file validation severside
 $("#commentForm").validate({
-  errorElement : "p",
-  rules: {
+   errorElement : "p",
+   rules: {
    pic: {
       required: true
     //not working  accept: "video/*, video/mp4, image/*",
@@ -89,15 +89,15 @@ $("#commentForm").validate({
 //callback function for validation
 //this function then uses the geolcation api to send gps coords along with the form to the server
 function sendForm(form) {
-var cname = $("#cname option:selected").text();
-         console.log("start check");
-     globalForm = form;
-     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION TO SUBMIT REPORT");});
-     } 
-     else { 
-          alert("geolocation not supported, will not save report gps coordinates");
-       }
+   var cname = $("#cname option:selected").text();
+   document.cookie = "name=" + cname;
+   globalForm = form;
+   if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION IN YOUR BROWSER SETTINGS TO SUBMIT REPORT");});
+   } 
+   else { 
+      alert("geolocation not supported, will not save report gps coordinates");
+   }
 }
 
 //callback to geolocation api save coordinates
@@ -114,17 +114,39 @@ function saveCoords(position) {
         processData: false,  // tell jQuery not to process the data
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
-           console.log(data);
-           alert(data);
-  //         location.reload(true);
+ //          console.log(data);
+ //          alert(data);
+           location.reload(true);
         }
      });   
 }
+
+//get cookie by name
+function getCookie(name) {
+    var dc = document.cookie;
+    var prefix = name + "=";
+    var begin = dc.indexOf("; " + prefix);
+    if (begin == -1) {
+        begin = dc.indexOf(prefix);
+        if (begin != 0) return null;
+    }
+    else
+    {
+        begin += 2;
+        var end = document.cookie.indexOf(";", begin);
+        if (end == -1) {
+        end = dc.length;
+        }
+    }
+    return unescape(dc.substring(begin + prefix.length, end));
+} 
+
+
 
 //loading animation stuff
 $body = $("body");
 
 $(document).on({
     ajaxStart: function() { $body.addClass("loading");    },
-     ajaxStop: function() { $body.removeClass("loading"); }    
+    ajaxStop: function() { $body.removeClass("loading"); }    
 });

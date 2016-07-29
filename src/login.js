@@ -1,11 +1,14 @@
 $("#submit").on('click', submit );
 
+var auto = "auto";
 $.ajax({
    type : "POST",
+   data : {auto : auto},
    url : "src/login.php",
    success : function (data) {
-      if(data == "autologin")
+      if($.trim(data) == "autologin") {
          window.location.href = "https://scvwdflood.org/view.html";
+      }
    }});
 
 
@@ -17,7 +20,7 @@ function submit() {
       url: "src/login.php",
       data:{ info : info }, 
       success: function(data) {
-         if(data == "user" || data == "admin") {
+         if($.trim(data) == "user" || $.trim(data) == "admin") {
 //            document.cookie = "username="+data;
             window.location.href = "https://scvwdflood.org/view.html"; 
             //login succesful
