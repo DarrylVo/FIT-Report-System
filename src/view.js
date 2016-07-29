@@ -1,5 +1,6 @@
 //btw if you are confused about report id vs marker title, they are basically the same thing
 //marker only has one field that i can set as an id, which is called the "title" in the marker object. 
+checkLoginStatus();
 
 //map stuff
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
@@ -48,6 +49,7 @@ $("#all").checkboxradio();
 $("#filter").checkboxradio();
 $("#realtime").checkboxradio();
 $("#realtime").checkboxradio("option","disabled",true);
+$("#logout").button().on("click", logout);
 $("#updateFilter").button();
 $("#updateFilter").button("option","disabled",true);
 $("#report").accordion({collapsible:true, 
@@ -225,11 +227,7 @@ function showReports() {
                                                   $(this).dialog("close");},
                       "Cancel" : function () { $(this).dialog("close");}}
           });
-       });/*
-      if(getCookie('username') == "user") {
-         del.button("disable");
-
-      }*/
+       });
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));
                                                                      }); 
@@ -278,7 +276,10 @@ function showReports() {
        })
        });
       
-
+      if(user == "user") {
+         edit.button("disable");
+         del.button("disable");
+      }
 
       div.append(name,timestamp,text,zoom,del,edit);
       $("#report").append(section, div);
@@ -316,6 +317,39 @@ function editReport(report, name, timestamp, text) {
 
 }
 
+function logout() {
+   var logout = "logout";
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ logout : logout }, 
+      success: function(data) {
+         console.log(data);
+         window.location.href = "https://scvwdflood.org/login.html";
+    }});
+}
+
+
+function checkLoginStatus() {
+   var status = "status";
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ status : status }, 
+      success: function(data) {
+         console.log(data);
+         if(data != "admin" && data != "user") {
+            window.location.href = "https://scvwdflood.org/login.html"; 
+         }
+         else
+            user = data;
+    }});
+
+
+
+
+}
+/*
 function getCookie(cName) {
     var cVal = document.cookie.match('(?:^|;) ?' + cName + '=([^;]*)(?:;|$)');
     if (!cVal) {
@@ -323,7 +357,7 @@ function getCookie(cName) {
     } else {
       return cVal[1];
     }
-}
+}*/
 
 
 //zooms in on the marker and opens the attached popup bubble 
@@ -483,7 +517,6 @@ function removeMarker(id) {
    return false;
 
 }
-
 
 
 

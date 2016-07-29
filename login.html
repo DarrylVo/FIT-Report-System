@@ -1,30 +1,25 @@
 <html>
 
 <head>
-
-        <meta charset="UTF-8">
 	<script src = "src/jquery-3.0.0.min.js"></script>
+	<script src="src/bootstrap.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.css" />
+	<link rel="stylesheet" href="css/bootstrap-theme.css" />
+	<link rel="stylesheet" href="css/login.css" />
 	<link rel="stylesheet" href="css/jquery-ui.css" />
 	<link rel="stylesheet" href="css/jquery-ui.structure.css" />
 	<link rel="stylesheet" href="css/jquery-ui.theme.css" />
 	<script src="src/jquery-ui.js"></script>
-	<script src="src/login.js"></script>
+
 </head>
 
-<body>
+<div class="login-page">
+  <div class="form">
+      <input id = "username" type="text" placeholder="username"/>
+      <input id = "password"  type="password" placeholder="password"/>
+      <button id = "submit">login</button>
+  </div>
+</div>
 
-   <label for ="username"> Username: </label>
-   <input id = "username"></input><br>
-   <label for = "password"> Password:   </label>
-   <input type = "password" id = "password"></input><br>
-   <button id = "submit"> Login </button>
-   
-   <script src="src/login.js"></script>
-
-</body>
-
-
-
-
-
+        <script src = "src/login.js"></script>
 </html>

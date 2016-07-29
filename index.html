@@ -5,13 +5,41 @@
 <head>
         <meta charset="UTF-8">
 	<script src = "src/jquery-3.0.0.min.js"></script>
+	<script src="src/bootstrap.js"></script>
+	<script src="src/jquery-ui.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.css" />
+	<link rel="stylesheet" href="css/bootstrap-theme.css" />
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<link rel="stylesheet" href="css/jquery-ui.structure.css" />
+	<link rel="stylesheet" href="css/jquery-ui.theme.css" />
 </head>
 
 <body>
 
-<a href = "report.html"> Submit Report </a>
-<br>
-<a href = "login.html"> Login to View screen </a>
+<br><br><br>
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6">
+          <img class="img-square" src="images/report-icon.gif" alt="Generic placeholder image" width="180" height="180">
+          <h2>Submit Report</h2>
+          <button id = "report"> Go </button>  
+        </div>
+        <div class="col-xs-6">
+          <img class="img-circle" src="images/mapbox.jpg" alt="Generic placeholder image" width="180" height="180">
+          <h2>View Reports</h2>
+          <button id = "view" class = "  "> Go </button> 
+        </div>
+    </div>
+</div>
+
+<script>
+$("#view").button().on("click",function () {window.location.href = "https://scvwdflood.org/login.html"});
+$("#report").button().on("click", function() {window.location.href = "https://scvwdflood.org/report.html"});
+
+</script>
 
 	
 </body>

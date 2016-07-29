@@ -6,18 +6,40 @@
 //creates mysqli connection object...   
 $mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 
+   session_start();
+
 //if error kill urself
 if($mysqli->connect_errno) {
    printf("Connect failed: %s\n", $mysqli->connect_error);
    exit;
 }
 
+//check login status
+else if (isset($_REQUEST['status'])) {
+   if(isset ($_SESSION['user'])) {
+      echo $_SESSION['user']; 
+   }
 
 
+}
+
+//logout- reset session data
+else if (isset($_REQUEST['logout']) && isset($_SESSION['user']) ) {
+$_SESSION = array();
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+session_destroy();
+   echo "wooo";
+}
 
 
 //on this POST, gets all the reports out of the mysql db
-else if(isset($_REQUEST['getreports'])){
+else if(isset($_REQUEST['getreports'])&& isset($_SESSION['user'])){
 
    $arr = array();
    $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp  
@@ -37,7 +59,7 @@ else if(isset($_REQUEST['getreports'])){
 
 //on this post, gets all the names out of the mysql db table 2!
 
-else if(isset($_REQUEST['getnames'])){
+else if(isset($_REQUEST['getnames'])&& isset($_SESSION['user'])){
 
    $arr = array();
    $sql_q = 'SELECT gps_id, gps_name 
@@ -59,7 +81,7 @@ else if(isset($_REQUEST['getnames'])){
 //also removes the picture!
 //god damnit do i really have to query out the extension.... Dx
 //i should really call this delete_id so its more clear...
-else if(isset($_REQUEST['id'])){
+else if(isset($_REQUEST['id'])&& $_SESSION['user'] == 'admin' ){
 
    $id = $_POST['id']; 
 
@@ -91,7 +113,7 @@ else if(isset($_REQUEST['id'])){
 }
 
 //On this POST, only get the records specified by the date range
-else if(isset($_REQUEST['range'])){
+else if(isset($_REQUEST['range'])&& isset($_SESSION['user'])){
    $range = $_POST['range'];
    
    $arr = array();
@@ -110,7 +132,8 @@ else if(isset($_REQUEST['range'])){
    unset($arr);
 }
 
-else if(isset($_REQUEST['report'])) {
+//On this POST, update the record.... 
+else if(isset($_REQUEST['report'])&& $_SESSION['user'] == 'admin') {
 
    $report = $_POST['report'];
    $name = '"'.$report['name'].'"';
@@ -127,7 +150,6 @@ else if(isset($_REQUEST['report'])) {
    mysqli_free_result($retval); 
 }
 
-//On this POST, edit the 
 
 mysqli_close($mysqli);
 ?>

@@ -42,3 +42,7 @@ width : 100px;
 width : 100px;
 margin-left : 21px;
 }
+
+#logout {
+float : right;
+}
