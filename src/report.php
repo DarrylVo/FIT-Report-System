@@ -186,11 +186,11 @@ else if(isset($_REQUEST['namereg'])){
    else {
       $stmt2 = $mysqli->prepare("INSERT INTO GPSCOORDS_TB2 (gps_name) VALUES (?)");
       $stmt2->bind_param('s',$name);
-      $stmt2->execute();
       
-      if(!$stmt2->store_result()) {
+      if(!$stmt2->execute()) {
          echo "error in registering name n stuff";
       }
+      $stmt2->store_result();
       $stmt2->free_result();
       $stmt2->close();
    }
@@ -222,13 +222,12 @@ else if(isset($_REQUEST['getnames'])){
         FROM GPSCOORDS_TB2';
    $stmt = $mysqli->prepare($sql_q);
    $stmt->bind_result($name);
-   $stmt->execute();
 
-   if(!$stmt->store_result()) {
+   if(!$stmt->execute()) {
       printf("genames error\n");
       exit;
    }
-
+   $stmt->store_result();
    while($stmt->fetch())  
       $arr[] = $name;
 

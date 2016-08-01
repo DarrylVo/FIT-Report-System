@@ -132,7 +132,7 @@ $("#updateFilter").on("click", function() {
            refreshId = -1;
         }
         clearLocalData();
-        getFilteredReports('"'+$("#filter1").val()+'"', '"'+$("#filter2").val() + ' 23:59:59"');
+        getFilteredReports($("#filter1").val(), $("#filter2").val() + ' 23:59:59');
      }
      else
         $("<div>").dialog({title : "Error"}).append($("<p>").text("Filter options are improperly filled out"));
@@ -195,6 +195,7 @@ function getFilteredReports(leftDate, rightDate) {
       url: "src/view.php",
       data:{ range : range }, 
       success: function(data) {
+         console.log(data);
          storeReports(data);
          showReports();
          createMarkers();
@@ -253,8 +254,9 @@ function showReports() {
            data:{ getnames : getnames }, 
            success: function(data) {
               var names_json = jQuery.parseJSON(data);
+              $("#name").empty();
               for(var i = 0; i < names_json.length; i++) {
-                 $("#name").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
+                 $("#name").append($("<option></option>").attr("value", names_json[i]).text(names_json[i]));
               }
               $("#name").val(e.data.name);
            }   
@@ -365,7 +367,7 @@ function deleteData(id) {
       url: "src/view.php",
       data:{ id : id }, 
       success: function(data) {
-         //console.log(data);
+         console.log(data);
     }});
 }
 

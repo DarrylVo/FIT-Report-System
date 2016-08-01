@@ -43,16 +43,23 @@ else if(isset($_REQUEST['getreports'])&& isset($_SESSION['user'])){
    $arr = array();
    $sql_q = 'SELECT gps_id, gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp  
         FROM GPSCOORDS_TB1 ORDER BY gps_timestamp';
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
-      printf("getcoords error\n");
+
+   $stmt = $mysqli->prepare($sql_q);
+   
+
+   if(!$stmt->execute() ) {
+      printf("getreports error\n");
+      echo $stmt->error;
       exit;
    }
-   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC))  
+   $result = $stmt->get_result();
+   while($row = $result->fetch_array(MYSQL_ASSOC))  
       $arr[] = $row;
 
    echo json_encode($arr);
-   mysqli_free_result($retval); 
+   $stmt->free_result();
+   $stmt->close();
+   $result->free;
    unset($arr);
 }
 
@@ -61,18 +68,22 @@ else if(isset($_REQUEST['getreports'])&& isset($_SESSION['user'])){
 else if(isset($_REQUEST['getnames'])&& isset($_SESSION['user'])){
 
    $arr = array();
-   $sql_q = 'SELECT gps_id, gps_name 
+   $sql_q = 'SELECT gps_name 
         FROM GPSCOORDS_TB2';
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
-      printf("getcoords error\n");
+   $stmt = $mysqli->prepare($sql_q);
+   $stmt->bind_result($name);
+
+   if(!$stmt->execute()) {
+      printf("genames error\n");
       exit;
    }
-   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC))  
-      $arr[] = $row;
+   $stmt->store_result();
+   while($stmt->fetch())  
+      $arr[] = $name;
 
    echo json_encode($arr);
-   mysqli_free_result($retval); 
+   $stmt->free_result();
+   $stmt->close(); 
    unset($arr);
 }
 
@@ -82,52 +93,64 @@ else if(isset($_REQUEST['getnames'])&& isset($_SESSION['user'])){
 //i should really call this delete_id so its more clear...
 else if(isset($_REQUEST['id'])&& $_SESSION['user'] == 'admin' ){
 
-   $id = $_POST['id']; 
+   $id = filter_input(INPUT_POST,'id', FILTER_SANITIZE_STRING); 
 
    $sql_q = 'SELECT gps_ext
-        FROM GPSCOORDS_TB1 WHERE gps_id =' . $id;
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
+        FROM GPSCOORDS_TB1 WHERE gps_id = ?';
+   $stmt = $mysqli->prepare($sql_q);
+   $stmt->bind_param('i', $id);
+   $stmt->bind_result($ext);
+   if(! $stmt->execute() ) {
       printf("getext  error\n");
+      echo $stmt->error;
+      echo $id;
       exit;
    }
-   $ext = mysqli_fetch_array($retval,MYSQL_ASSOC);
-   $name ="../pic/" . $id . "." . $ext['gps_ext'];
+   $stmt->fetch();
+   printf("ext:%s\n",$ext);
+   $name ="../pic/" . $id . "." . $ext;
    if(!unlink($name))
       echo "failed to delete pic";
-   mysqli_free_result($retval);
+   $stmt->free_result();
+   $stmt->close();
 
 
-
-   $sql_q2 = 'DELETE FROM GPSCOORDS_TB1 WHERE gps_id = '. $id ;
-   $retval2 = mysqli_query( $mysqli, $sql_q2);
-   if(! $retval2) {
+   $sql_q2 = 'DELETE FROM GPSCOORDS_TB1 WHERE gps_id = ?';
+   $stmt2 = $mysqli->prepare($sql_q2);
+   $stmt2->bind_param('i',$id);
+   if(! $stmt2->execute()) {
       printf("single record delete error\n");
       exit;
    }
    else 
       echo "succ one record delete";
 
-   mysqli_free_result($retval2); 
+   $stmt2->free_result();
+   $stmt2->close();
 }
 
 //On this POST, only get the records specified by the date range
 else if(isset($_REQUEST['range'])&& isset($_SESSION['user'])){
+
    $range = $_POST['range'];
    
    $arr = array();
    $sql_q = 'SELECT * 
-        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN ' . $range[0] .' AND ' .$range[1] . ' ORDER BY gps_timestamp'  ;
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
+        FROM GPSCOORDS_TB1 WHERE gps_timestamp BETWEEN ? AND ? ORDER BY gps_timestamp';
+   $stmt = $mysqli->prepare($sql_q);
+   $stmt->bind_param('ss',$range[0], $range[1]);
+   if(! $stmt->execute() ) {
       printf("get filtered reports  error\n");
       exit;
    }
-   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC))  
+   $result = $stmt->get_result();
+   while($row = $result->fetch_array(MYSQL_ASSOC))  
       $arr[] = $row;
 
    echo json_encode($arr);
-   mysqli_free_result($retval); 
+   $result->free();
+   $stmt->free_result();
+   $stmt->close();
    unset($arr);
 }
 
@@ -135,18 +158,20 @@ else if(isset($_REQUEST['range'])&& isset($_SESSION['user'])){
 else if(isset($_REQUEST['report'])&& $_SESSION['user'] == 'admin') {
 
    $report = $_POST['report'];
-   $name = '"'.$report['name'].'"';
-   $text = '"'.$report['text'].'"';
-   $timestamp = '"'.$report['timestamp'].'"';
-   $sql_q =  "UPDATE GPSCOORDS_TB1 SET gps_text =". $text . ", gps_name = " . $name . ", gps_timestamp = " . $timestamp . "WHERE gps_id=" . $report['id'];
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
+   $name = $report['name'];
+   $text = $report['text'];
+   $timestamp = $report['timestamp'];
+   $sql_q =  "UPDATE GPSCOORDS_TB1 SET gps_text =?, gps_name =?, gps_timestamp = ? WHERE gps_id=?";
+   $stmt = $mysqli->prepare($sql_q);
+   $stmt->bind_param('sssi',$text, $name, $timestamp, $report['id']);
+   if(! $stmt->execute() ) {
       printf("edit report error  error\n");
       exit;
    }
 
    echo 'succ';
-   mysqli_free_result($retval); 
+   $stmt->free_result();
+   $stmt->close();
 }
 
 
