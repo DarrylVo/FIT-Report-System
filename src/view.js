@@ -66,10 +66,10 @@ $("#logout").button().on("click", function() {
 });
 $("#updateFilter").button();
 $("#updateFilter").button("option","disabled",true);
-$("#report").accordion({collapsible:true, 
+$("#report").accordion({collapsible:true, autoHeight : false,
    activate: function( event, ui ) {
       if(!$.isEmptyObject(ui.newHeader.offset())) {
-         $('#report').animate({ scrollTop: ui.newHeader.offset().top }, 'slow');
+         $(ui.newHeader).ScrollTo();
       }}});
 
 

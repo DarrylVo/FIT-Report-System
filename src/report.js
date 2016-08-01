@@ -30,7 +30,7 @@ function updateNames() {
       success: function(data) {
          var names_json = jQuery.parseJSON(data);
          for(var i = 0; i < names_json.length; i++) {
-            $("#cname").append($("<option></option>").attr("value", names_json[i].gps_name).text(names_json[i].gps_name));
+            $("#cname").append($("<option></option>").attr("value", names_json[i]).text(names_json[i]));
          }
          var cookie = getCookie("name");
          if(cookie!=null) {
@@ -115,8 +115,12 @@ function saveCoords(position) {
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
  //          console.log(data);
- //          alert(data);
+           alert(data);
+           
            location.reload(true);
+        },
+        error : function(a, b, c) {
+           alert(b + " BASICALLY, THERE WAS AN ERROR IN SUBMITING THIS REPORT. TRY AGAIN");
         }
      });   
 }

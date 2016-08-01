@@ -30,9 +30,14 @@ if($mysqli->connect_errno) {
 // DO i need further validation? *scratches head
 //TODO: oh yeah, mysql sanitation kek
 else if(isset($_REQUEST['name'])){
-   $text = $_POST['text'];
-   $name = $_POST['name'];
+   $text =filter_input(INPUT_POST,'text', FILTER_SANITIZE_STRING);
+   $name = filter_input(INPUT_POST,'name', FILTER_SANITIZE_STRING);
    $ext = end(explode(".",$_FILES['pic']['name']));
+   $date;
+   $coords;
+
+   $timestamp_flag = 0;
+   $stmt;
   // $coords = $_POST['coords'];
 
   //uses id3 library to get metadata about video/photos 
@@ -48,164 +53,151 @@ else if(isset($_REQUEST['name'])){
     //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
-      echo "found gps video";
+      //echo "found gps video";
       //if the video file also has iphone timestamp....
       if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-        echo "found iphone timestamp";
+        //echo "found iphone timestamp";
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
-
+        $timestamp_flag = 1;
       }
       //or a android style timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
-         echo "found android timestamp";
+         //echo "found android timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-        
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+        $timestamp_flag = 1;
       }
       //or no timestamp
-      else {
-          echo "found no timestamp";
-        // var_dump($metaData['tags_html']['quicktime']);       
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
-          "VALUES ".
-          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
-      }
    }
+
    //if its a picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
-      echo "found picture with gps coordinates";
-      $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
+     // echo "found picture with gps coordinates";
+      $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 
+        1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
        //if picture also has timestamp...i
       if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
-        echo "found timestamp";
+        //echo "found timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
-
+         $timestamp_flag = 1;
       }
       //or no timestamp
-      else {
-         echo "didnt find timestamp";
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
-          "VALUES ".
-          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
-      }
    }
+
    //if it has no gps coordinates...
    else {
-       echo "couldnt find any gps coordinates";
+       //echo "couldnt find any gps coordinates";
       $coords = $_POST['coords'];
       //but it may still have an iphone timestamp
       if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-       echo "found iphone timestamp"; 
+       //echo "found iphone timestamp"; 
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
-
+        $timestamp_flag = 1;
       }
 
       //but it may still have an android video timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
-         echo "found android video timestamp";
+         //echo "found android video timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
+        $timestamp_flag = 1;
       }
       //or a photo timestamp...
       else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
-        echo "found photo timestamp";
+        //echo "found photo timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-           "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
-           "VALUES ".
-           "('$coords[0]', '$coords[1]','$text','$ext','$name', '$date')";
-
+         $timestamp_flag = 1;
       }
      //or absolutely nothing at all
-      else {
-         echo "found no timestamps at all";
-         $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-          "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
-          "VALUES ".
-          "('$coords[0]', '$coords[1]','$text','$ext','$name')";
-      }
    }
-
-
-   $result = mysqli_query($mysqli,$sql_q);
-   if(!$result) {
+   if($timestamp_flag == 1) {
+      $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+        "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+        "VALUES ".
+        "(?, ?, ?, ?, ?, ?)";
+      $stmt = $mysqli->prepare($sql_q);
+      $stmt->bind_param('ddssss', $coords[0], $coords[1], $text, $ext, $name, $date);
+   }
+   else {
+      $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
+        "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+        "VALUES ".
+        "(?, ?, ?, ?, ?)";
+      $stmt = $mysqli->prepare($sql_q);
+      $stmt->bind_param('ddsss', $coords[0], $coords[1], $text, $ext, $name);
+   }
+   
+   if(!$stmt->execute()) {
       printf("report insert error\n");
+      echo $stmt->error;
       exit;
    }
-   $sql_q2 = "SELECT * FROM GPSCOORDS_TB1
+
+
+
+   $sql_q2 = "SELECT gps_id FROM GPSCOORDS_TB1
      ORDER BY gps_id DESC
       LIMIT 0,1";
-   $result2 = mysqli_query($mysqli,$sql_q2);
+   $stmt2 = $mysqli->prepare($sql_q2);
+   $stmt2->bind_result($record);   
    
-   if(!$result2) {
+   if(!$stmt2->execute()) {
       printf("report select primary key error\n");
       exit;
    }
-   
-   $record = mysqli_fetch_array($result2, MYSQL_ASSOC);
-
-   mysqli_free_result($result);
-   mysqli_free_result($result2);
+   $stmt2->fetch(); 
 
    $file = $_FILES['pic']; 
    $fileContent = file_get_contents($file['tmp_name']);
 
-   $test = fopen("../pic/".$record['gps_id'].".".$ext,"x");
-   if(!$test)
+   $test = fopen("../pic/".$record.".".$ext,"x");
+   if(!$test) {
       echo "couldnt open";
+      exit;
+   }
    fwrite($test, $fileContent);
    fclose($test);
-        
+
+   $stmt->free_result();
+   $stmt->close();
+
+   $stmt2->free_result();
+   $stmt2->close();
+   echo "Report Saved Succesfully";
+
 }
 
 // on this POST, registers the name and team id in the mysql database table 2!
 else if(isset($_REQUEST['namereg'])){
-   $teamid = $_POST['teamid'];
-   $name = $_POST['namereg'];
-   $checkResult = mysqli_query($mysqli, "SELECT * FROM GPSCOORDS_TB2 WHERE
-      gps_name = '$name' LIMIT 1");
-   $num_rows = mysqli_num_rows($checkResult);
-   if($num_rows > 0) {
+   $name = filter_input(INPUT_POST, 'namereg', FILTER_SANITIZE_STRING);
+
+   $stmt1 = $mysqli->prepare("SELECT * FROM GPSCOORDS_TB2 WHERE
+      gps_name = ? LIMIT 1");
+   $stmt1->bind_param('s',$name);
+   $stmt1->execute();
+   $stmt1->store_result();
+   
+
+   if($stmt1->num_rows > 0) {
       echo "error";
-   } 
+   }
    else {
-      $sql_q = "INSERT INTO GPSCOORDS_TB2 ".
-            "(gps_teamid, gps_name)".
-            "VALUES".
-            "('$teamid', '$name')";
-      $result = mysqli_query($mysqli, $sql_q);
-      if(!$result) {
+      $stmt2 = $mysqli->prepare("INSERT INTO GPSCOORDS_TB2 (gps_name) VALUES (?)");
+      $stmt2->bind_param('s',$name);
+      $stmt2->execute();
+      
+      if(!$stmt2->store_result()) {
          echo "error in registering name n stuff";
       }
-      mysqli_free_result($result);
+      $stmt2->free_result();
+      $stmt2->close();
    }
-   mysqli_free_result($checkResult);
+   $stmt1->free_result();
+   $stmt1->close();
 }
-
+/*
 // on this POST, saves the random report
 else if(isset($_REQUEST['rand'])){
    $rand = $_POST['rand'];
@@ -219,25 +211,30 @@ else if(isset($_REQUEST['rand'])){
       exit;
    }
    mysqli_free_result($result);
-}
+}*/
 
 //on this post, gets all the names out of the mysql db table 2!
 
 else if(isset($_REQUEST['getnames'])){
 
    $arr = array();
-   $sql_q = 'SELECT gps_id, gps_name 
+   $sql_q = 'SELECT gps_name 
         FROM GPSCOORDS_TB2';
-   $retval = mysqli_query( $mysqli, $sql_q);
-   if(! $retval ) {
-      printf("getcoords error\n");
+   $stmt = $mysqli->prepare($sql_q);
+   $stmt->bind_result($name);
+   $stmt->execute();
+
+   if(!$stmt->store_result()) {
+      printf("genames error\n");
       exit;
    }
-   while($row = mysqli_fetch_array($retval, MYSQL_ASSOC))  
-      $arr[] = $row;
+
+   while($stmt->fetch())  
+      $arr[] = $name;
 
    echo json_encode($arr);
-   mysqli_free_result($retval); 
+   $stmt->free_result();
+   $stmt->close(); 
    unset($arr);
 }
 
