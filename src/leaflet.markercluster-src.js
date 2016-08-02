@@ -745,8 +745,14 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
                               this._myZoomEnd();
                               
                            },this);
-                           this._map.setView(newPoint, 15);
-                           this._map.setView(trollPoint, 15);
+                           if(this._map._zoom <= 15) {
+                              this._map.setView(newPoint, 15);
+                              this._map.setView(trollPoint, 15);
+
+                           }
+                           else {
+                              this._map.fireEvent('moveend');
+                           }
                            zoomCluster.setOpacity(0.3);
                            this._map.addOneTimeEventListener('click', function() {
                               zoomCluster.setOpacity(1);

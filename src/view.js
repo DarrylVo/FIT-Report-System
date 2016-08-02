@@ -388,7 +388,8 @@ function createMarkers() {
            cluster.refreshClusters();
             var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
             var newPoint = mymap.unproject(targetPoint, 15);
-            mymap.setView(newPoint, 15);
+            if(mymap.getZoom()<15)
+               mymap.setView(newPoint, 15);
             var index = $('#' + e.target.options.title).val();
             //console.log(index);
             $("#report").accordion("option", "active", parseInt(index)); 
