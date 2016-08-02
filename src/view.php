@@ -4,8 +4,10 @@
 //how this works php script works- on ajax posts from either view.js/report.js/register.js it will do mysql queries
 
 //creates mysqli connection object...   
-$mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 
+$file = file_get_contents("../../mysqlpass");
+$file = preg_replace('/\s+/', '', $file);
+$mysqli = new mysqli("localhost", "root", "Applez255", "GPSCOORDS");
 //starts the session for login stuff
 session_start();
 
