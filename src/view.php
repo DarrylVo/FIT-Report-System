@@ -163,9 +163,9 @@ else if(isset($_REQUEST['report'])&& $_SESSION['user'] == 'admin') {
    $name = $report['name'];
    $text = $report['text'];
    $timestamp = $report['timestamp'];
-   $sql_q =  "UPDATE GPSCOORDS_TB1 SET gps_text =?, gps_name =?, gps_timestamp = ?, default_gps = ?, default_timestamp = ? WHERE gps_id=?";
+   $sql_q =  "UPDATE GPSCOORDS_TB1 SET gps_lat = ?, gps_long = ?, gps_text =?, gps_name =?, gps_timestamp = ?, default_gps = ?, default_timestamp = ? WHERE gps_id=?";
    $stmt = $mysqli->prepare($sql_q);
-   $stmt->bind_param('sssiii',$text, $name, $timestamp, $report['default_gps'], $report['default_timestamp'], $report['id'] );
+   $stmt->bind_param('ddsssiii',$report['lat'], $report['long'], $text, $name, $timestamp, $report['default_gps'], $report['default_timestamp'], $report['id'] );
    if(! $stmt->execute() ) {
       printf("edit report error  error\n");
       exit;

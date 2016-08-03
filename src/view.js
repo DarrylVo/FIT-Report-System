@@ -44,6 +44,7 @@ var LeafIcon = L.Icon.extend({
 
 var redIcon = new LeafIcon({iconUrl: 'images/red-circle.png'});
 var blueIcon = new LeafIcon({iconUrl: 'images/blu-circle.png'});
+var greenIcon = new LeafIcon({iconUrl: 'images/grn-circle.png'});
 
 //jquery calls for ui init
 $("#filter1").datepicker();
@@ -269,11 +270,38 @@ function showReports() {
            }   
        })
        });
+      var toggle = $("<button>").button({label: "Unlock Marker"});
+      toggle.on('click', reports[i], function (e) {
+         var thisMarker = findMarker(e.data.id);
+         if(thisMarker.dragging.enabled()) {
+            mymap.removeLayer(thisMarker);
+            cluster.addLayer(thisMarker);
+            thisMarker.dragging.disable();
+            thisMarker.off('popupopen');
+            thisMarker.on('click',markerCallback);
+            $(this).text("Unlock Marker");
+            thisMarker.setIcon(redIcon);
+
+            editLocation(e.data,thisMarker.getLatLng());     
+
+            thisMarker.unbindPopup();
+            markerBind(thisMarker, e.data); 
+         }
+         else {
+            cluster.removeLayer(thisMarker);
+            mymap.addLayer(thisMarker);
+            thisMarker.setIcon(greenIcon);
+            thisMarker.on('popupopen', function(){this.closePopup();});
+            thisMarker.off('click',markerCallback);
+            thisMarker.dragging.enable();
+            $(this).text("Lock Marker");
+         }
+      });
       if(user == "user") {
          edit.button("disable");
          del.button("disable");
       }
-      div.append(name,timestamp,text,def_gps,def_timestamp,zoom,del,edit);
+      div.append(name,timestamp,text,def_gps,def_timestamp,zoom,del,edit,toggle);
       $("#report").append(section, div);
       flag = 1;
    }
@@ -311,8 +339,23 @@ function editReport(report, name, timestamp, text, default_gps, default_timestam
       url: "src/view.php",
       data:{ report : report }, 
       success: function(data) {
-         console.log(data);
+         //console.log(data);
     }});
+
+}
+
+//mini version of editReport that only deals with the gps coordinate stuff
+function editLocation(report, pos) {
+            report.lat = pos.lat;
+            report.long = pos.lng;
+            console.log(report);
+            $.ajax({
+               type: "POST",
+               url: "src/view.php",
+               data:{ report : report }, 
+               success: function(data) {
+               //console.log(data);
+            }});
 
 }
 
@@ -392,7 +435,18 @@ function createMarkers() {
    for(var i = 0; i < reports.length; i ++) {
       if(!hasMarker(reports[i].id)) {
          var marker = L.marker([reports[i].lat, reports[i].long],{icon:redIcon, title:reports[i].id , autoPan : false, keepInView : false});
-         marker.on('click',function(e) {
+         marker.on('click', markerCallback);
+         markerBind(marker, reports[i]);
+         markers.push(marker);
+         //console.log(marker);
+        cluster.addLayer(marker);
+      }
+   }
+
+}
+
+function markerCallback(e) {
+
             for(var i = 0; i < markers.length; i ++) {
                markers[i].setIcon(redIcon);
             }
@@ -407,15 +461,6 @@ function createMarkers() {
             var index = $('#' + e.target.options.title).val();
             //console.log(index);
             $("#report").accordion("option", "active", parseInt(index)); 
-         
-         });
-         markerBind(marker, reports[i]);
-         markers.push(marker);
-         //console.log(marker);
-        cluster.addLayer(marker);
-      }
-   }
-
 }
 
 //binds popup containing report data to marker!
