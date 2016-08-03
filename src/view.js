@@ -168,7 +168,9 @@ function storeReports(data) {
            "text" : coord_json[i].gps_text,  
            "ext" : coord_json[i].gps_ext,
            "name" : coord_json[i].gps_name,
-           "timestamp" : coord_json[i].gps_timestamp}; 
+           "timestamp" : coord_json[i].gps_timestamp,
+           "default_gps" : parseInt(coord_json[i].default_gps),
+           "default_timestamp" : parseInt(coord_json[i].default_timestamp)}; 
          reports.push(rep);  
                  //console.log(rep);
       }
@@ -221,6 +223,8 @@ function showReports() {
       var name = $("<p></p>").attr("id","sidebarName").text("Name: "+ reports[i].name);
       var text = $("<p></p>").attr("id","sidebarText").text("Text: "+ reports[i].text);
       var del = $("<button></button>").button({label:"Delete"});
+      var def_gps = $("<p>").attr("id","sidebarFGPS").text("Fallback GPS: " + (reports[i].default_gps == 1 ? 'Y' : 'N'));
+      var def_timestamp = $("<p>").attr("id","sidebarFTimestamp").text("Fallback Timestamp: " + (reports[i].default_timestamp == 1 ? 'Y' : 'N'));
       del.on("click", reports[i].id, function(e) {
          $("#dialog-confirm").dialog({
            modal : true,
@@ -240,13 +244,16 @@ function showReports() {
           title : "Edit This report",
           minWidth : 350,
           buttons : {
-                      "Edit" : function() { editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val());
+                      "Edit" : function() { editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val(),
+                                                         ($("#def_gps").prop('checked') == true ? 1 : 0), ($("#def_timestamp").prop('checked') == true ? 1 : 0));
                                             $(this).dialog("close");},
                       "Cancel" : function () { $(this).dialog("close");}}
           });
           //$("#name").val(e.data.name);
-          $('#timestamp').val(e.data.timestamp);
-          $('#text').val(e.data.text);
+        $('#timestamp').val(e.data.timestamp);
+        $('#text').val(e.data.text);
+        $('#def_gps').prop('checked', (e.data.default_gps ==1 ? true : false));
+        $('#def_timestamp').prop('checked', (e.data.default_timestamp ==1 ? true : false));
         var getnames = "getnames";
 	$.ajax({
            type: "POST",
@@ -266,7 +273,7 @@ function showReports() {
          edit.button("disable");
          del.button("disable");
       }
-      div.append(name,timestamp,text,zoom,del,edit);
+      div.append(name,timestamp,text,def_gps,def_timestamp,zoom,del,edit);
       $("#report").append(section, div);
       flag = 1;
    }
@@ -276,13 +283,21 @@ function showReports() {
 }
 
 //edits the locally stored, then changes it in the mysql db via ajax call to php
-function editReport(report, name, timestamp, text) {
+function editReport(report, name, timestamp, text, default_gps, default_timestamp) {
    $("#"+report.id).children("#sidebarName").text("Name: " + name); 
    report.name = name;
    $("#"+report.id).children("#sidebarText").text("Text: " + text); 
    report.text = text;
    $("#"+report.id).children("#sidebarTimestamp").text("Timestamp: " + timestamp); 
+
+   $("#"+report.id).children("#sidebarFGPS").text("Fallback GPS: " + (default_gps == 1 ? 'Y' : 'N'));
+   $("#"+report.id).children("#sidebarFTimestamp").text("Fallback Timestamp: " + (default_timestamp == 1 ? 'Y' : 'N'));
    report.timestamp = timestamp;
+   report.default_gps =default_gps ;
+   report.default_timestamp =default_timestamp ;
+
+
+
 
    var marker = findMarker(report.id);
    marker.unbindPopup();
@@ -291,7 +306,6 @@ function editReport(report, name, timestamp, text) {
    marker.getPopup().update();
    marker.closePopup();
    marker.openPopup();
-
    $.ajax({
       type: "POST",
       url: "src/view.php",
@@ -411,6 +425,8 @@ function markerBind(marker, report) {
    var time = $("<p></p>").text("Timestamp: " + report.timestamp);
    var name = $("<p></p>").attr("id", "markerName").text("name: " + report.name);
    var text = $("<p></p>").text("Text: " + report.text);
+   var def_gps = $("<p>").text("Fallback GPS: " + (report.default_gps == 1 ? 'Y' : 'N'));
+   var def_timestamp = $("<p>").text("Fallback Timestamp: " + (report.default_timestamp == 1 ? 'Y' : 'N'));
 
 
    var div;
@@ -424,7 +440,7 @@ function markerBind(marker, report) {
       link.append($("<source></source>").attr("src",src).attr("type","video/mp4")); 
 
    } 
-   div = $("<div></div>").attr("id", "marker"+report.id).append(lat,name,time,text, link);
+   div = $("<div></div>").attr("id", "marker"+report.id).append(lat,name,time,text,def_gps,def_timestamp, link);
    marker.bindPopup(div.html());
 }
 

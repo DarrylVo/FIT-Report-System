@@ -38,7 +38,8 @@ else if(isset($_REQUEST['name'])){
    $date;
    $coords;
 
-   $timestamp_flag = 0;
+   $timestamp_flag = true;
+   $gps_flag = true;
    $stmt;
   // $coords = $_POST['coords'];
 
@@ -54,6 +55,7 @@ else if(isset($_REQUEST['name'])){
 
     //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
+      $gps_flag = false;
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
       //echo "found gps video";
       //if the video file also has iphone timestamp....
@@ -62,13 +64,13 @@ else if(isset($_REQUEST['name'])){
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
-        $timestamp_flag = 1;
+        $timestamp_flag = false;
       }
       //or a android style timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
          //echo "found android timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-        $timestamp_flag = 1;
+        $timestamp_flag = false;
       }
       //or no timestamp
    }
@@ -76,13 +78,14 @@ else if(isset($_REQUEST['name'])){
    //if its a picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
      // echo "found picture with gps coordinates";
+      $gps_flag = false;
       $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 
         1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
        //if picture also has timestamp...i
       if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
         //echo "found timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $timestamp_flag = 1;
+         $timestamp_flag = false;
       }
       //or no timestamp
    }
@@ -97,38 +100,38 @@ else if(isset($_REQUEST['name'])){
         // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
         $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
         $date = $exp[0] ." ". substr($exp[1],0,-5);
-        $timestamp_flag = 1;
+        $timestamp_flag = false;
       }
 
       //but it may still have an android video timestamp
       else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
          //echo "found android video timestamp";
          $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-        $timestamp_flag = 1;
+        $timestamp_flag = false;
       }
       //or a photo timestamp...
       else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
         //echo "found photo timestamp";
          $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $timestamp_flag = 1;
+         $timestamp_flag = false;
       }
      //or absolutely nothing at all
    }
-   if($timestamp_flag == 1) {
+   if($timestamp_flag == false) {
       $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-        "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp) ".
+        "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp, default_gps, default_timestamp) ".
         "VALUES ".
-        "(?, ?, ?, ?, ?, ?)";
+        "(?, ?, ?, ?, ?, ?, ?, ?)";
       $stmt = $mysqli->prepare($sql_q);
-      $stmt->bind_param('ddssss', $coords[0], $coords[1], $text, $ext, $name, $date);
+      $stmt->bind_param('ddssssii', $coords[0], $coords[1], $text, $ext, $name, $date, $gps_flag, $timestamp_flag);
    }
    else {
       $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
-        "(gps_lat, gps_long, gps_text, gps_ext, gps_name) ".
+        "(gps_lat, gps_long, gps_text, gps_ext, gps_name, default_gps, default_timestamp) ".
         "VALUES ".
-        "(?, ?, ?, ?, ?)";
+        "(?, ?, ?, ?, ?, ?, ?)";
       $stmt = $mysqli->prepare($sql_q);
-      $stmt->bind_param('ddsss', $coords[0], $coords[1], $text, $ext, $name);
+      $stmt->bind_param('ddsssii', $coords[0], $coords[1], $text, $ext, $name, $gps_flag, $timestamp_flag);
    }
    
    if(!$stmt->execute()) {
