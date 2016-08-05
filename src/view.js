@@ -4,6 +4,7 @@ checkLoginStatus();
 
 //map stuff
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
+var currentMarker;
 
 //stores reports from mysql and map markers
 var reports = [];
@@ -217,7 +218,7 @@ function showReports() {
    for(var i = 0; i < reports.length; i++) {
       if(hasMarker(reports[i].id))
          continue;
-      var div = $("<div>").attr("id", reports[i].id.toString()).val(i);
+      var div = $("<div>").attr("id", reports[i].id.toString());
       var section = $("<h3>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp).attr("id", 'a'+reports[i].id.toString())
       var id = $("<p></p>").text("ID: "+ reports[i].id + " Timestamp:"+reports[i].timestamp);
       var timestamp = $("<p></p>").attr("id","sidebarTimestamp").text("Timestamp: " + reports[i].timestamp);
@@ -290,11 +291,24 @@ function showReports() {
          else {
             cluster.removeLayer(thisMarker);
             mymap.addLayer(thisMarker);
+            mymap.fire("zoomend");
+            currentMarker.setIcon(redIcon);
+            currentMarker = thisMarker;
             thisMarker.setIcon(greenIcon);
-            thisMarker.on('popupopen', function(){this.closePopup();});
+            currentMarker = thisMarker;
+            thisMarker.on('popupopen', function(){this.closePopup(); 
+                                           if(currentMarker!=this) {
+                                              if(currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
+                                                 currentMarker.setIcon(redIcon);
+                                              currentMarker = this;
+                                              $("#a"+this.options.title).trigger("click");
+                                              cluster.refreshClusters();
+                                           } 
+                                               });
             thisMarker.off('click',markerCallback);
             thisMarker.dragging.enable();
             $(this).text("Lock Marker");
+            cluster.refreshClusters();
          }
       });
       if(user == "user") {
@@ -408,8 +422,10 @@ function zoomOnMarker(centerMarker) {
 //also does ajax call to make the server delete it from the mysql database
 function deleteData(id) {
    //console.log(id);
-   $("#"+id).remove();
-   $("#a"+id).remove();
+
+   
+   $("#report").children("#"+id).remove();
+   $("#report").children("#a"+id).remove();
    $("#report").accordion("refresh");
    $("#report").accordion("option","active",false);
    cluster.removeLayer(findMarker(id));
@@ -446,11 +462,17 @@ function createMarkers() {
 }
 
 function markerCallback(e) {
-
+           /*
             for(var i = 0; i < markers.length; i ++) {
-               markers[i].setIcon(redIcon);
-            }
+               if(markers[i].options.icon.options.iconUrl != "images/grn-circle.png")
+                  markers[i].setIcon(redIcon);
+            }*/
+            if(currentMarker != null && currentMarker != e.target && currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
+               currentMarker.setIcon(redIcon);
+    if(currentMarker != e.target )
+       $('#a' + e.target.options.title).trigger("click");
             e.target.setIcon(blueIcon);
+            currentMarker = e.target;
            // console.log(e.target);
 
            cluster.refreshClusters();
@@ -458,9 +480,17 @@ function markerCallback(e) {
             var newPoint = mymap.unproject(targetPoint, 15);
             if(mymap.getZoom()<15)
                mymap.setView(newPoint, 15);
-            var index = $('#' + e.target.options.title).val();
-            //console.log(index);
-            $("#report").accordion("option", "active", parseInt(index)); 
+/*
+var nodes=[], values=[];
+var el = document.getElementById('a' + e.target.options.title);
+for (var att, i = 0, atts = el.attributes, n = atts.length; i < n; i++){
+    att = atts[i];
+    nodes.push(att.nodeName);
+    values.push(att.nodeValue);
+}
+console.log(nodes);
+console.log(values);
+*/
 }
 
 //binds popup containing report data to marker!
