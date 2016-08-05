@@ -114,10 +114,10 @@ function saveCoords(position) {
         processData: false,  // tell jQuery not to process the data
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
- //          console.log(data);
-           alert(data);
+           console.log(data);
+ //          alert(data);
            
-           location.reload(true);
+     //      location.reload(true);
         },
         error : function(a, b, c) {
            alert(b + " BASICALLY, THERE WAS AN ERROR IN SUBMITING THIS REPORT. TRY AGAIN");

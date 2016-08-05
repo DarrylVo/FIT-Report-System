@@ -52,7 +52,7 @@ else if(isset($_REQUEST['name'])){
 
 //   var_dump($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']);
 //this part is a little dirty, checks for the existense of tags to use in the mysql store
-
+   var_dump($metaData);
     //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $gps_flag = false;
