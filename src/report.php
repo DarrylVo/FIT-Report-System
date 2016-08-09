@@ -49,74 +49,73 @@ else if(isset($_REQUEST['name'])){
    $metaData = $getID3->analyze($_FILES['pic']['tmp_name']);
    getid3_lib::CopyTagsToComments($metaData);
  
+   //exec call to use exif tool since php read_exif_data() for iphone photos is broken...
+   exec("exif ". $_FILES['pic']['tmp_name'] . ' | grep -e "Latitude" -e "Longitude"', $output);
+   exec("exif ". $_FILES['pic']['tmp_name'] . ' | grep -e "North or" -e "East or"', $direction);
 
-//   var_dump($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']);
-//this part is a little dirty, checks for the existense of tags to use in the mysql store
-   var_dump($metaData);
     //if the file has video gps metadata....
    if(isset($metaData['tags_html']['quicktime']['gps_latitude'])) {
       $gps_flag = false;
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
-      //echo "found gps video";
-      //if the video file also has iphone timestamp....
-      if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-        //echo "found iphone timestamp";
-        // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
-        $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
-        $date = $exp[0] ." ". substr($exp[1],0,-5);
-        $timestamp_flag = false;
-      }
-      //or a android style timestamp
-      else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
-         //echo "found android timestamp";
-         $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-        $timestamp_flag = false;
-      }
-      //or no timestamp
    }
-
    //if its a picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
      // echo "found picture with gps coordinates";
       $gps_flag = false;
       $coords = array(0 => $metaData['jpg']['exif']['GPS']['computed']['latitude'], 
         1 => $metaData['jpg']['exif']['GPS']['computed']['longitude']);
-       //if picture also has timestamp...i
-      if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
-        //echo "found timestamp";
-         $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $timestamp_flag = false;
-      }
-      //or no timestamp
+   }
+   //the getid3 library no longer works for geo tagged iphone pictures for recent versions of php, 
+   //have to use exec call to "exif" to get the data out instead
+   //this checks if the exec call got anything 
+   else if(count($output) == 2) {
+      $lat_dir = explode('|',$direction[0]);
+      $lon_dir = explode('|',$direction[1]);
+      $lat_temp = explode(',',explode('|',$output[0])[1]);
+      $lat_temp[0] = floatval($lat_temp[0]);
+      $lat_temp[1] = floatval($lat_temp[1]);
+      $lat_temp[2] = floatval($lat_temp[2]);
+      $lat =$lat_temp[0]+((($lat_temp[1]*60)+($lat_temp[2]))/floatval(3600)); 
+      $lon_temp = explode(',',explode('|',$output[1])[1]);
+      $lon_temp[0] = floatval($lon_temp[0]);
+      $lon_temp[1] = floatval($lon_temp[1]);
+      $lon_temp[2] = floatval($lon_temp[2]);
+      $lon =$lon_temp[0]+((($lon_temp[1]*60)+($lon_temp[2]))/floatval(3600)); 
+      if($lat_dir[1] == 'S')
+         $lat = -$lat;
+      if($lon_dir[1] == 'W')
+         $lon = -$lon;
+      $coords = [$lat, $lon];
+      $gps_flag = false;
    }
 
    //if it has no gps coordinates...
    else {
        //echo "couldnt find any gps coordinates";
       $coords = $_POST['coords'];
-      //but it may still have an iphone timestamp
-      if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
-       //echo "found iphone timestamp"; 
-        // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
-        $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
-        $date = $exp[0] ." ". substr($exp[1],0,-5);
-        $timestamp_flag = false;
-      }
-
-      //but it may still have an android video timestamp
-      else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
-         //echo "found android video timestamp";
-         $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
-        $timestamp_flag = false;
-      }
-      //or a photo timestamp...
-      else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
-        //echo "found photo timestamp";
-         $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
-         $timestamp_flag = false;
-      }
-     //or absolutely nothing at all
    }
+      //TIMESTAMP CHECKING HERE
+      //but it may still have an iphone timestamp
+   if(isset($metaData['tags_html']['quicktime']['creationdate'])) {
+      // $date = date('Y-m-d H:i:s', $metaData['tags_html']['quicktime']['creationdate']); 
+      $exp = explode("T", $metaData['tags_html']['quicktime']['creationdate'][0]);
+      $date = $exp[0] ." ". substr($exp[1],0,-5);
+      $timestamp_flag = false;
+   }
+
+   //but it may still have an android video timestamp
+   else if(isset($metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix'])) {
+      //echo "found android video timestamp";
+      $date = date('Y-m-d H:i:s', $metaData['quicktime']['moov']['subatoms'][0]['creation_time_unix']); 
+      $timestamp_flag = false;
+   }
+   //or a photo timestamp...
+   else if(isset($metaData['jpg']['exif']['IFD0']['DateTime'])) {
+      //echo "found photo timestamp";
+      $date = $metaData['jpg']['exif']['IFD0']['DateTime'];
+      $timestamp_flag = false;
+   }
+   //or absolutely nothing at all
    if($timestamp_flag == false) {
       $sql_q = "INSERT INTO GPSCOORDS_TB1 ".
         "(gps_lat, gps_long, gps_text, gps_ext, gps_name, gps_timestamp, default_gps, default_timestamp) ".
@@ -156,7 +155,6 @@ else if(isset($_REQUEST['name'])){
 
    $file = $_FILES['pic']; 
    $fileContent = file_get_contents($file['tmp_name']);
-
    $test = fopen("../pic/".$record.".".$ext,"x");
    if(!$test) {
       echo "couldnt open";
@@ -243,5 +241,8 @@ else if(isset($_REQUEST['getnames'])){
 }
 
 mysqli_close($mysqli);
+
+
+
 
 ?>

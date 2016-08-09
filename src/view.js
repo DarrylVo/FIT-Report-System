@@ -314,6 +314,7 @@ function showReports() {
       if(user == "user") {
          edit.button("disable");
          del.button("disable");
+         toggle.button("disable");
       }
       div.append(name,timestamp,text,def_gps,def_timestamp,zoom,del,edit,toggle);
       $("#report").append(section, div);
