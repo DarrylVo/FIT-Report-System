@@ -1,7 +1,6 @@
 <?php
-//TODO: I REALLY NEED MYSQL SANITATION
 
-//how this works php script works- on ajax posts from either view.js/report.js/register.js it will do mysql queries
+//how this works php script works- on ajax posts from either view.js it will do mysql queries
 
 //creates mysqli connection object...   
 
@@ -24,7 +23,7 @@ else if (isset($_REQUEST['status'])) {
    }
 }
 
-//logout- reset session data
+//logout- reset session data & cookies
 else if (isset($_REQUEST['logout']) && isset($_SESSION['user']) ) {
    $_SESSION = array();
    if (ini_get("session.use_cookies")) {
@@ -43,11 +42,8 @@ else if (isset($_REQUEST['logout']) && isset($_SESSION['user']) ) {
 else if(isset($_REQUEST['getreports'])&& isset($_SESSION['user'])){
 
    $arr = array();
-   $sql_q = 'SELECT * 
-        FROM GPSCOORDS_TB1 ORDER BY gps_timestamp';
-
+   $sql_q = 'SELECT * FROM GPSCOORDS_TB1 ORDER BY gps_timestamp';
    $stmt = $mysqli->prepare($sql_q);
-   
 
    if(!$stmt->execute() ) {
       printf("getreports error\n");
@@ -115,7 +111,6 @@ else if(isset($_REQUEST['id'])&& $_SESSION['user'] == 'admin' ){
       echo "failed to delete pic";
    $stmt->free_result();
    $stmt->close();
-
 
    $sql_q2 = 'DELETE FROM GPSCOORDS_TB1 WHERE gps_id = ?';
    $stmt2 = $mysqli->prepare($sql_q2);

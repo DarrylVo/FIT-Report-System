@@ -4,6 +4,7 @@ checkLoginStatus();
 
 //map stuff
 var mymap = L.map('mapid').setView([37.279518,-121.867905], 11);
+//global to store the current marker aka the most recently clicked marker
 var currentMarker;
 
 //stores reports from mysql and map markers
@@ -11,7 +12,7 @@ var reports = [];
 var markers = [];
 var refreshId = -1;
 
-//intializes marker clusters
+//intializes marker clusters from the leaflet library
 var cluster = L.markerClusterGroup({iconCreateFunction : function (cluster) {
    var children = cluster.getAllChildMarkers();
    for(var i = 0; i < children.length; i ++) {
@@ -31,7 +32,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
     accessToken: 'pk.eyJ1Ijoicm9zZ2x1ZSIsImEiOiJjaXBzbDkzdXcwM3c1ZmttMjhyNzR1bmVxIn0.g45wbGBB5SprrAES2ju06Q'
 }).addTo(mymap);
 	
-//add cluster to map
+//add cluster marker object to map
 mymap.addLayer(cluster);
 
 //custom icon stuff
@@ -56,6 +57,16 @@ $("#all").checkboxradio();
 $("#filter").checkboxradio();
 $("#realtime").checkboxradio();
 $("#realtime").checkboxradio("option","disabled",true);
+$("#updateFilter").button();
+$("#updateFilter").button("option","disabled",true);
+
+//initializes the sidebar accordion with callbacks
+$("#report").accordion({collapsible:true, autoHeight : false,
+   activate: function( event, ui ) {
+      if(!$.isEmptyObject(ui.newHeader.offset())) {
+         $(ui.newHeader).ScrollTo();
+      }}});
+//button with callback to logout
 $("#logout").button().on("click", function() {
    $("<div>").text("Do you wish to logout?").dialog({
    title : "Logout",
@@ -66,14 +77,6 @@ $("#logout").button().on("click", function() {
    });
 
 });
-$("#updateFilter").button();
-$("#updateFilter").button("option","disabled",true);
-$("#report").accordion({collapsible:true, autoHeight : false,
-   activate: function( event, ui ) {
-      if(!$.isEmptyObject(ui.newHeader.offset())) {
-         $(ui.newHeader).ScrollTo();
-      }}});
-
 
 //on "Show All" radiobox check, activate polling and disable filter boxes
 $("#all").on("click",function() {
@@ -117,16 +120,16 @@ $("#realtime").on("click", function() {
 
 $("#updateFilter").on("click", function() {
    if($("#filter1").datepicker("getDate")!=null) {
-      if($("#realtime").prop("checked") == true) {
-         if(refreshId != -1) {
-            window.clearInterval(refreshId);
-            clearLocalData();
-            refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
-         }
-         else {
-            clearLocalData();
-            refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
-         } 
+     if($("#realtime").prop("checked") == true) {
+        if(refreshId != -1) {
+           window.clearInterval(refreshId);
+           clearLocalData();
+           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+        }
+        else {
+           clearLocalData();
+           refreshId =  window.setInterval(getFilteredReports, 3000, '"'+$("#filter1").val()+ '"', "(CURRENT_DATE + INTERVAL 1 DAY - INTERVAL 1 SECOND)");
+        } 
      }
      else if($("#filter2").datepicker("getDate")!=null) { 
         if(refreshId != -1) {
@@ -191,7 +194,6 @@ function clearLocalData() {
 }
 
 //gets a subset of the reports indictated by left and right date
-//TODO: give a better name, like getcertainreports or some shit
 function getFilteredReports(leftDate, rightDate) {
    var range = [ leftDate, rightDate];
    $.ajax({
@@ -207,12 +209,10 @@ function getFilteredReports(leftDate, rightDate) {
        });
 } 
 
-//shows all reports in the global reports[] array by doing a jquery select element
-//attaches callback functions to the created elements to zoom and delete
-//TODO: the way the accordion sidebar is created is technically wrong- im basiclaly creating a new accordion for each section,
-// when it should be one accordion with many sections. however this way each accordion is unique, so i can handle the accordion popup
-// on marker click. There probably is a better way to do that(like setting a marker field when i create an accordion section for the 
-// marker), but im lazy 
+//shows all reports in the global reports[] array on the sidebar by using jquery to create a crapton of html elements
+//i basically populate a jquery-ui accordion: each section is made up of a header and a div containing all the elements.
+//attaches callback functions to the created elements to zoom,delete, edit, and toggle unlock buttons
+//NOTE: this is why I want to move from jquery to a good web framework for all this ui stuff. too much code!
 function showReports() {
    var flag = 0;
    for(var i = 0; i < reports.length; i++) {
@@ -224,9 +224,11 @@ function showReports() {
       var timestamp = $("<p></p>").attr("id","sidebarTimestamp").text("Timestamp: " + reports[i].timestamp);
       var name = $("<p></p>").attr("id","sidebarName").text("Name: "+ reports[i].name);
       var text = $("<p></p>").attr("id","sidebarText").text("Text: "+ reports[i].text);
-      var del = $("<button></button>").button({label:"Delete"});
       var def_gps = $("<p>").attr("id","sidebarFGPS").text("Fallback GPS: " + (reports[i].default_gps == 1 ? 'Y' : 'N'));
       var def_timestamp = $("<p>").attr("id","sidebarFTimestamp").text("Fallback Timestamp: " + (reports[i].default_timestamp == 1 ? 'Y' : 'N'));
+
+      //now for the buttons and their callbacks....
+      var del = $("<button></button>").button({label:"Delete"});
       del.on("click", reports[i].id, function(e) {
          $("#dialog-confirm").dialog({
            modal : true,
@@ -236,8 +238,10 @@ function showReports() {
               "Cancel" : function () { $(this).dialog("close");}}
           });
        });
+
       var zoom = $("<button></button>").button({label:"Zoom"});
       zoom.on("click", reports[i].id, function(e) { zoomOnMarker(findMarker(e.data));}); 
+      
       var edit = $("<button>").button({label:"Edit"});
       edit.on("click", reports[i], function(e) {
         // deleteData(e.data);
@@ -246,10 +250,12 @@ function showReports() {
           title : "Edit This report",
           minWidth : 350,
           buttons : {
-                      "Edit" : function() { editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val(),
-                                                         ($("#def_gps").prop('checked') == true ? 1 : 0), ($("#def_timestamp").prop('checked') == true ? 1 : 0));
-                                            $(this).dialog("close");},
-                      "Cancel" : function () { $(this).dialog("close");}}
+             "Edit" : function() { 
+                 editReport(e.data, $("#name").val(), $("#timestamp").val(), $("#text").val(),
+                   ($("#def_gps").prop('checked') == true ? 1 : 0), ($("#def_timestamp").prop('checked') == true ? 1 : 0));
+                 $(this).dialog("close");},
+                      
+             "Cancel" : function () { $(this).dialog("close");}}
           });
           //$("#name").val(e.data.name);
         $('#timestamp').val(e.data.timestamp);
@@ -271,9 +277,16 @@ function showReports() {
            }   
        })
        });
+     //END EDIT button STUFF, i know its long :x
+
+      //toggle button that unlcoks/locks marker so you can drag it around
+      //NOTE- i remove the marker from the cluster group when dragging it around because
+      // with the clusters you have to readd stuff if you want to change the positions
       var toggle = $("<button>").button({label: "Unlock Marker"});
       toggle.on('click', reports[i], function (e) {
          var thisMarker = findMarker(e.data.id);
+         //if dragging is enabled, disable dragging (lock marker position).,
+         // and do cleanup/save the location
          if(thisMarker.dragging.enabled()) {
             mymap.removeLayer(thisMarker);
             cluster.addLayer(thisMarker);
@@ -288,6 +301,8 @@ function showReports() {
             thisMarker.unbindPopup();
             markerBind(thisMarker, e.data); 
          }
+         //if dragging is disabled, enable dragging (unlock marker position),
+         // do things like update current marker, change color to green, etc...
          else {
             cluster.removeLayer(thisMarker);
             mymap.addLayer(thisMarker);
@@ -296,36 +311,44 @@ function showReports() {
             currentMarker = thisMarker;
             thisMarker.setIcon(greenIcon);
             currentMarker = thisMarker;
-            thisMarker.on('popupopen', function(){this.closePopup(); 
-                                           if(currentMarker!=this) {
-                                              if(currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
-                                                 currentMarker.setIcon(redIcon);
-                                              currentMarker = this;
-                                              $("#a"+this.options.title).trigger("click");
-                                              cluster.refreshClusters();
-                                           } 
-                                               });
+            thisMarker.on('popupopen', function(){
+               this.closePopup(); 
+               if(currentMarker!=this) {
+                  if(currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
+                     currentMarker.setIcon(redIcon);
+                  currentMarker = this;
+                  $("#a"+this.options.title).trigger("click");
+                  cluster.refreshClusters();
+               } 
+            });
             thisMarker.off('click',markerCallback);
             thisMarker.dragging.enable();
             $(this).text("Lock Marker");
             cluster.refreshClusters();
          }
       });
+      //END OF TOGGLE LOCK/UNLOCK BUTTON STUFF
+
+      //if user is not a admin, remove ability to edit reports.
+      //dont worry, even if they somehow enable this the php code will verify the correct login info stuff too
       if(user == "user") {
          edit.button("disable");
          del.button("disable");
          toggle.button("disable");
       }
+      //creates the div to add to accordion
       div.append(name,timestamp,text,def_gps,def_timestamp,zoom,del,edit,toggle);
+      //adds the div and header to the accordion
       $("#report").append(section, div);
       flag = 1;
    }
+   //finish loop to add everything to the sidebar accordion
    if(flag == 1)
       $("#report").accordion("refresh");
 
 }
 
-//edits the locally stored, then changes it in the mysql db via ajax call to php
+//edits the locally stored report, then changes it in the mysql db via ajax call to php
 function editReport(report, name, timestamp, text, default_gps, default_timestamp) {
    $("#"+report.id).children("#sidebarName").text("Name: " + name); 
    report.name = name;
@@ -338,9 +361,6 @@ function editReport(report, name, timestamp, text, default_gps, default_timestam
    report.timestamp = timestamp;
    report.default_gps =default_gps ;
    report.default_timestamp =default_timestamp ;
-
-
-
 
    var marker = findMarker(report.id);
    marker.unbindPopup();
@@ -361,19 +381,18 @@ function editReport(report, name, timestamp, text, default_gps, default_timestam
 
 //mini version of editReport that only deals with the gps coordinate stuff
 function editLocation(report, pos) {
-            report.lat = pos.lat;
-            report.long = pos.lng;
-            console.log(report);
-            $.ajax({
-               type: "POST",
-               url: "src/view.php",
-               data:{ report : report }, 
-               success: function(data) {
+   report.lat = pos.lat;
+   report.long = pos.lng;
+   $.ajax({
+      type: "POST",
+      url: "src/view.php",
+      data:{ report : report }, 
+      success: function(data) {
                //console.log(data);
-            }});
-
+   }});
 }
 
+//removes the php session data, and changes page
 function logout() {
    var logout = "logout";
    $.ajax({
@@ -381,12 +400,13 @@ function logout() {
       url: "src/view.php",
       data:{ logout : logout }, 
       success: function(data) {
-         console.log(data);
+         //console.log(data);
          window.location.href = "https://scvwdflood.org/login.html";
     }});
 }
 
-
+//function that runs at page load. If not logged in (by checking php session data),
+//goes back to the login screen
 function checkLoginStatus() {
    var status = "status";
    $.ajax({
@@ -419,12 +439,11 @@ function zoomOnMarker(centerMarker) {
    cluster.refreshClusters();
 }
 
-//deletes the report and marker with this id. removes it from the map too, marker and the sidebar.
+//deletes the report and marker with this id. removes it from the markers[] and reports[] arr,
+//and removes them from the map and sidebar
 //also does ajax call to make the server delete it from the mysql database
 function deleteData(id) {
    //console.log(id);
-
-   
    $("#report").children("#"+id).remove();
    $("#report").children("#a"+id).remove();
    $("#report").accordion("refresh");
@@ -462,39 +481,26 @@ function createMarkers() {
 
 }
 
+//marker callback attached to every marker
+//d`oes things like changes the color of the marker on click, zoom in on marker on click, etc...
+//e.target in this function is the marker object that got clicked on
+//currentMarker is a global that holds the currently clicked on marker.
 function markerCallback(e) {
-           /*
-            for(var i = 0; i < markers.length; i ++) {
-               if(markers[i].options.icon.options.iconUrl != "images/grn-circle.png")
-                  markers[i].setIcon(redIcon);
-            }*/
-            if(currentMarker != null && currentMarker != e.target && currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
-               currentMarker.setIcon(redIcon);
-    if(currentMarker != e.target )
-       $('#a' + e.target.options.title).trigger("click");
-            e.target.setIcon(blueIcon);
-            currentMarker = e.target;
-           // console.log(e.target);
 
-           cluster.refreshClusters();
-            var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
-            var newPoint = mymap.unproject(targetPoint, 15);
-            if(mymap.getZoom()<15)
-               mymap.setView(newPoint, 15);
-/*
-var nodes=[], values=[];
-var el = document.getElementById('a' + e.target.options.title);
-for (var att, i = 0, atts = el.attributes, n = atts.length; i < n; i++){
-    att = atts[i];
-    nodes.push(att.nodeName);
-    values.push(att.nodeValue);
-}
-console.log(nodes);
-console.log(values);
-*/
+   if(currentMarker != null && currentMarker != e.target && currentMarker.options.icon.options.iconUrl != "images/grn-circle.png")
+      currentMarker.setIcon(redIcon);
+   if(currentMarker != e.target )
+      $('#a' + e.target.options.title).trigger("click");
+   e.target.setIcon(blueIcon);
+   currentMarker = e.target;
+   cluster.refreshClusters();
+   var targetPoint = mymap.project(e.target._latlng, 15).subtract([0, 175]);
+   var newPoint = mymap.unproject(targetPoint, 15);
+   if(mymap.getZoom()<15)
+      mymap.setView(newPoint, 15);
 }
 
-//binds popup containing report data to marker!
+//creates and binds popup containing report data to marker using jquery to create the elements!
 function markerBind(marker, report) {
    var src = 'pic/' + report.id + "." + report.ext;
    var lat = $("<p></p>").text("Lat/Long: " + report.lat + ", " + report.long).css('line-height', '1em');
@@ -503,7 +509,6 @@ function markerBind(marker, report) {
    var text = $("<p></p>").text("Text: " + report.text);
    var def_gps = $("<p>").text("Fallback GPS: " + (report.default_gps == 1 ? 'Y' : 'N'));
    var def_timestamp = $("<p>").text("Fallback Timestamp: " + (report.default_timestamp == 1 ? 'Y' : 'N'));
-
 
    var div;
    var link;

@@ -1,7 +1,6 @@
 <?php
-//TODO: I REALLY NEED MYSQL SANITATION
 
-//how this works php script works- on ajax posts from either view.js/report.js/register.js it will do mysql queries
+//how this works php script works- on ajax posts from either view.js/register.js it will do mysql queries
 
 //creates mysqli connection object...   
 
@@ -30,7 +29,6 @@ if($mysqli->connect_errno) {
 //If none are present the gps coordinates from the report post will be stored. those "backup" gps coordinates are the location of the phone when the report was submitted.
 
 // DO i need further validation? *scratches head
-//TODO: oh yeah, mysql sanitation kek
 else if(isset($_REQUEST['name'])){
    $text =filter_input(INPUT_POST,'text', FILTER_SANITIZE_STRING);
    $name = filter_input(INPUT_POST,'name', FILTER_SANITIZE_STRING);
