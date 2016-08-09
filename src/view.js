@@ -432,6 +432,7 @@ function zoomOnMarker(centerMarker) {
    for (var i = 0; i < markers.length; i ++ ) {
       markers[i].setIcon(redIcon);
    }
+   currentMarker = centerMarker;
    centerMarker.setIcon(blueIcon);
    centerMarker.update();
    mymap.setView(centerMarker._latlng,13,{animate: true, 
