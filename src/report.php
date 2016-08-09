@@ -35,6 +35,7 @@ else if(isset($_REQUEST['name'])){
    $ext = end(explode(".",$_FILES['pic']['name']));
    $date;
    $coords;
+   $rotation;
 
    $timestamp_flag = true;
    $gps_flag = true;
@@ -56,7 +57,7 @@ else if(isset($_REQUEST['name'])){
       $gps_flag = false;
       $coords = array( 0 => $metaData['tags']['quicktime']['gps_latitude'][0], 1 => $metaData['tags']['quicktime']['gps_longitude'][0]);
    }
-   //if its a picture file with gps coords...
+   //if its a (android)picture file with gps coords...
    else if(isset($metaData['jpg']['exif']['GPS']['computed'])) {
      // echo "found picture with gps coordinates";
       $gps_flag = false;
@@ -85,6 +86,7 @@ else if(isset($_REQUEST['name'])){
          $lon = -$lon;
       $coords = [$lat, $lon];
       $gps_flag = false;
+      $rotation = $metaData['jpg']['exif']['IFD0']['Orientation'];
    }
 
    //if it has no gps coordinates...
@@ -153,13 +155,33 @@ else if(isset($_REQUEST['name'])){
 
    $file = $_FILES['pic']; 
    $fileContent = file_get_contents($file['tmp_name']);
-   $test = fopen("../pic/".$record.".".$ext,"x");
-   if(!$test) {
-      echo "couldnt open";
-      exit;
+
+   if(isset($rotation)) {
+       
+      $fileContent = imagecreatefromstring($fileContent);
+      switch($rotation) {
+     
+         case 8:
+            $fileContent = imagerotate($fileContent,90,0);
+            break;
+         case 3:
+            $fileContent = imagerotate($fileContent,180,0);
+            break;
+         case 6:
+            $fileContent = imagerotate($fileContent,-90,0);
+            break;
+      }
+      imagejpeg($fileContent,"../pic/".$record.".".$ext);
    }
-   fwrite($test, $fileContent);
-   fclose($test);
+   else {
+      $test = fopen("../pic/".$record.".".$ext,"x");
+      if(!$test) {
+         echo "couldnt open";
+         exit;
+      }
+      fwrite($test, $fileContent);
+      fclose($test);
+   }
 
    $stmt->free_result();
    $stmt->close();
