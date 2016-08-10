@@ -2,6 +2,11 @@
 var coords = new Array(2);
 var globalForm;
 
+//updates the name select box from the db
+$( document ).ready(function() {
+    updateNames($("#cname"));
+});
+
 
 //sends a randomly located report to the server using ajax calls
 //TODO: make this thing generate a full on report, possibly with cat pics
@@ -21,7 +26,7 @@ function randomReport() {
 
 //updates the select drop down box with names from the mysql table 2
 //does this by doing ajax call/return from php
-function updateNames() {
+function updateNames(selectbox) {
    var getnames = "getnames";
    $.ajax({
       type: "POST",
@@ -30,11 +35,11 @@ function updateNames() {
       success: function(data) {
          var names_json = jQuery.parseJSON(data);
          for(var i = 0; i < names_json.length; i++) {
-            $("#cname").append($("<option></option>").attr("value", names_json[i]).text(names_json[i]));
+            $(selectbox).append($("<option></option>").attr("value", names_json[i]).text(names_json[i]));
          }
          var cookie = getCookie("name");
          if(cookie!=null) {
-            $("#cname").val(cookie);
+            $(selectbox).val(cookie);
          }
       }   
    });
@@ -61,12 +66,17 @@ function registerName(form) {
       url : 'src/report.php',
       type : 'POST',
       success : function(data) {
-         if(data == "error")
+         if ( typeof ___test !== 'undefined') {
+            console.log(data);
+            ___test =  data;
+         }     
+         else if(data == "error")
             alert("Name Already exists! Pick something else.");
          else
             window.location = "http://scvwdflood.org/report.html";
         }
      });   
+  
 }
 
 
@@ -93,7 +103,7 @@ function sendForm(form) {
    document.cookie = "name=" + cname;
    globalForm = form;
    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION IN YOUR BROWSER SETTINGS TO SUBMIT REPORT");});
+      navigator.geolocation.getCurrentPosition(saveCoords, function() { alert("ERROR: PLEASE ENABLE GEOLOCATION IN YOUR BROWSER SETTINGS TO SUBMIT REPORT, or you're using google chrome + not a https connection!");});
    } 
    else { 
       alert("geolocation not supported, will not save report gps coordinates");
@@ -115,9 +125,14 @@ function saveCoords(position) {
         contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
            console.log(data);
-           alert(data);
            
-     //      location.reload(true);
+           if ( typeof ___test === 'undefined') {
+              alert(data);
+              location.reload(true);
+           }
+           else {
+              ___test = "succ";
+           }
         },
         error : function(a, b, c) {
            alert(b + " BASICALLY, THERE WAS AN ERROR IN SUBMITING THIS REPORT. TRY AGAIN");

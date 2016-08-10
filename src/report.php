@@ -205,6 +205,7 @@ else if(isset($_REQUEST['namereg'])){
 
    if($stmt1->num_rows > 0) {
       echo "error";
+      exit;
    }
    else {
       $stmt2 = $mysqli->prepare("INSERT INTO GPSCOORDS_TB2 (gps_name) VALUES (?)");
@@ -212,6 +213,7 @@ else if(isset($_REQUEST['namereg'])){
       
       if(!$stmt2->execute()) {
          echo "error in registering name n stuff";
+         exit;
       }
       $stmt2->store_result();
       $stmt2->free_result();
@@ -219,6 +221,7 @@ else if(isset($_REQUEST['namereg'])){
    }
    $stmt1->free_result();
    $stmt1->close();
+   echo "succ";
 }
 /*
 // on this POST, saves the random report

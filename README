@@ -26,10 +26,22 @@ getID3 to get out gps info from the videos/pictures
 Bootstrap for some of the login pages ux
 Mysql for database
 
+********************** IMPORTANT SETTINGS
+(if you're using the snapshots off of AWS you don't have to worry, but these are some extra settings that are required for 
+this thing to work)
+
+if you have to rebuild the mysql database schema, hopefully i left some files regarding the database schema. otherwise go look in the php files. 
+
 dont forget to adjust the php.ini (if using php) so that bigger files can be POSTed (aka the videos).
 
-the photo/video also does an exec call to "exif", so run "sudo apt-get install exif" if its a new machine.
+the photo/video also does an exec call to "exif" to read apple picture gps metadata, so run "sudo apt-get install exif" if its a new machine.
 
+Chrome requires an https connection in order to use the HTML5 geolocation feature. If the server ip address changes, you WILL
+have https errors because I forced the apache webserver to use it. If the server IP changes, make sure to update the ssl certifcates
+and the dns name (scvwdflood.org) in the AWS console. Basically, make sure scvwdflood.org points to the right ip address. i
+I used "Lets Encrypt" to handle the ssl certificate stuff, look it up if you need to change the ssl certificate.
+
+****************
 Possbile project extensions:
 So if you got this project, most likely something broke (most likely the meta data extraction is broken)
 
