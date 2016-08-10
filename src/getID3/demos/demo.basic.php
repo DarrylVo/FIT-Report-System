@@ -13,7 +13,6 @@
 /////////////////////////////////////////////////////////////////
 
 
-
 // include getID3() library (can be in a different directory if full path is specified)
 require_once('../getid3/getid3.php');
 
@@ -21,15 +20,15 @@ require_once('../getid3/getid3.php');
 $getID3 = new getID3;
 
 // Analyze file and store returned data in $ThisFileInfo
-$ThisFileInfo = $getID3->analyze("../../pic/6.MOV");
-$anotherOne = $getID3->analyze("../../pic/7.mp4");
+
+$ThisFileInfo = $getID3->analyze("../../../pic/2.jpg");
 
 /*
  Optional: copies data from all subarrays of [tags] into [comments] so
  metadata is all available in one location for all tag formats
  metainformation is always available under [tags] even if this is not called
 */
-getid3_lib::CopyTagsToComments($ThisFileInfo);
+//getid3_lib::CopyTagsToComments($ThisFileInfo);
 
 /*
  Output desired information in whatever format you want
@@ -46,11 +45,9 @@ getid3_lib::CopyTagsToComments($ThisFileInfo);
 //echo $ThisFileInfo['audio']['bitrate'];           // audio bitrate
 //echo $ThisFileInfo['playtime_string'];            // playtime in minutes:seconds, formatted string
 
-/*
- if you want to see ALL the output, uncomment this line:
-*/
-echo "MOV";
-var_dump($ThisFileInfo['tags']);
-echo "mp4";
-var_dump($anotherOne['tags']);
-//echo '<pre>'.htmlentities(print_r($ThisFileInfo, true)).'</pre>';
+/* if you want to see all the tag data (from all tag formats), uncomment this line: */
+//echo '<pre>'.htmlentities(print_r($ThisFileInfo['comments'], true), ENT_SUBSTITUTE).'</pre>';
+
+/* if you want to see ALL the output, uncomment this line: */
+echo '<pre>'.htmlentities(print_r($ThisFileInfo, true), ENT_SUBSTITUTE).'</pre>';
+
