@@ -36,6 +36,8 @@ dont forget to adjust the php.ini (if using php) so that bigger files can be POS
 
 the photo/video also does an exec call to "exif" to read apple picture gps metadata, so run "sudo apt-get install exif" if its a new machine.
 
+The php version im using is the packaged one from apt-get. I also created a soft link from php to the packaged version in usr/local/bin, which is php5 on the commandline. keep that in mind if the versions or somehting are causing problems!
+
 Chrome requires an https connection in order to use the HTML5 geolocation feature. If the server ip address changes, you WILL
 have https errors because I forced the apache webserver to use it. If the server IP changes, make sure to update the ssl certifcates
 and the dns name (scvwdflood.org) in the AWS console. Basically, make sure scvwdflood.org points to the right ip address. i
@@ -46,7 +48,7 @@ Possbile project extensions:
 So if you got this project, most likely something broke (most likely the meta data extraction is broken)
 
 After you finish fixing (or if somehow everything is still working) here are some projects i recommend:
-1. rewriting all the php server scripts to python
+1. rewriting all the php server scripts to python. or just making the php scripts better. 
 
 2. creating an iphone/android app for the reporting in order to create some kind of offline mode that can save all the reports offline and can flushes all the reports 
 when theres cell/wifi signal
@@ -56,7 +58,11 @@ when theres cell/wifi signal
 
 4. rewrite the program into some kind of framework (angularJS, react, etc...) instead of just straight up using jquery
 
-5. Ask anyone who you're working with if they need any kind of software that would make their jobs easier!
+5. Security- This program has minimal security for its login system. At most I have really shitty php session stuff/cookies to handle logins, 
+https, hashed passwords, and prepared statements for the mysql quieries. THe really shitty part is the sessions/cookies. 
+Improving security would be good, not that it really matters if someone really wanted to hack it xd xd.
+
+6. Ask anyone who you're working with if they need any kind of software that would make their jobs easier!
 
 ▄░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▄
 ░░___________________0__________________░░
