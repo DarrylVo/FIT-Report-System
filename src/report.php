@@ -3,7 +3,6 @@
 //how this works php script works- on ajax posts from either view.js/register.js it will do mysql queries
 
 //creates mysqli connection object...   
-
 $file = file_get_contents("../../mysqlpass");
 $file = preg_replace('/\s+/', '', $file);
 $mysqli = new mysqli("localhost", "root", $file, "GPSCOORDS");
@@ -188,7 +187,7 @@ else if(isset($_REQUEST['name'])){
 
    $stmt2->free_result();
    $stmt2->close();
-   echo "Report Saved Succesfully";
+   echo json_encode("Report Saved Succesfully");
 
 }
 
@@ -204,7 +203,7 @@ else if(isset($_REQUEST['namereg'])){
    
 
    if($stmt1->num_rows > 0) {
-      echo "error";
+      echo json_encode("error");
       exit;
    }
    else {
@@ -221,7 +220,7 @@ else if(isset($_REQUEST['namereg'])){
    }
    $stmt1->free_result();
    $stmt1->close();
-   echo "succ";
+   echo json_encode("succ");
 }
 /*
 // on this POST, saves the random report
@@ -263,9 +262,10 @@ else if(isset($_REQUEST['getnames'])){
    unset($arr);
 }
 
+else {
+   var_dump($_POST);
+}
+
 mysqli_close($mysqli);
-
-
-
 
 ?>

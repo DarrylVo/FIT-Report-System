@@ -26,6 +26,11 @@ getID3 to get out gps info from the videos/pictures
 Bootstrap for some of the login pages ux
 Mysql for database
 
+Testing:
+PHPunit with GUzzle to simulate post stuff
+QUNIT
+
+
 ********************** IMPORTANT SETTINGS
 (if you're using the snapshots off of AWS you don't have to worry, but these are some extra settings that are required for 
 this thing to work)
@@ -42,6 +47,8 @@ Chrome requires an https connection in order to use the HTML5 geolocation featur
 have https errors because I forced the apache webserver to use it. If the server IP changes, make sure to update the ssl certifcates
 and the dns name (scvwdflood.org) in the AWS console. Basically, make sure scvwdflood.org points to the right ip address. i
 I used "Lets Encrypt" to handle the ssl certificate stuff, look it up if you need to change the ssl certificate.
+
+there are backup and restore scripts that save/restore from a s3 bucket called "fitreport". Credentials are in credentials.csv file one directy up from the apache root, along with the mysql db pass
 
 ****************
 Possbile project extensions:

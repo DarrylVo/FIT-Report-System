@@ -117,21 +117,20 @@ function sendForm(form) {
 function saveCoords(position) {
    coords[0] = position.coords.latitude;
    coords[1] = position.coords.longitude;
+   console.log(globalForm);
    $(globalForm).ajaxSubmit({
         url : 'src/report.php',
         type : 'POST',
         data : {coords : coords},
-        processData: false,  // tell jQuery not to process the data
-        contentType: false,  // tell jQuery not to set contentType
+ //       processData: false,  // tell jQuery not to process the data
+ //       contentType: false,  // tell jQuery not to set contentType
         success : function(data) {
-           console.log(data);
-           
            if ( typeof ___test === 'undefined') {
               alert(data);
               location.reload(true);
            }
            else {
-              ___test = "succ";
+              ___test = data;
            }
         },
         error : function(a, b, c) {

@@ -1,5 +1,5 @@
 <?php
-$file = file_get_contents("../../mysqlpass");
+$file = file_get_contents("../../../mysqlpass");
 $file = preg_replace('/\s+/', '', $file);
 $mysqli = new mysqli("localhost", "root", $file, "GPSCOORDS");
 
