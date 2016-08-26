@@ -70,7 +70,7 @@ function registerName(form) {
             console.log(data);
             ___test =  data;
          }     
-         else if(data == "error")
+         else if(JSON.parse(data) == "error name already exists")
             alert("Name Already exists! Pick something else.");
          else
             window.location = "http://scvwdflood.org/report.html";

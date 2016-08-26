@@ -14,8 +14,6 @@ if($mysqli->connect_errno) {
    printf("Connect failed: %s\n", $mysqli->connect_error);
    exit;
 }
-
-
 //NEW THING TO HANDLE REPORT SAVING TO MYSQL DATABASE AND PICTURE SAVING
 //does the report text and the picture in one go!
 //the trigger to this ajax POST response is only after validation!
@@ -40,13 +38,11 @@ else if(isset($_REQUEST['name'])){
    $gps_flag = true;
    $stmt;
   // $coords = $_POST['coords'];
-
   //uses id3 library to get metadata about video/photos 
    $getID3 = new getID3;
 
    $metaData = $getID3->analyze($_FILES['pic']['tmp_name']);
    getid3_lib::CopyTagsToComments($metaData);
- 
    //exec call to use exif tool since php read_exif_data() for iphone photos is broken...
    exec("exif ". $_FILES['pic']['tmp_name'] . ' | grep -e "Latitude" -e "Longitude"', $output);
    exec("exif ". $_FILES['pic']['tmp_name'] . ' | grep -e "North or" -e "East or"', $direction);
@@ -133,8 +129,10 @@ else if(isset($_REQUEST['name'])){
    }
    
    if(!$stmt->execute()) {
-      printf("report insert error\n");
-      echo $stmt->error;
+      ////printf("report insert error\n");
+//      echo json_encode($stmt->error);
+
+      echo json_encode($_POST['test']);
       exit;
    }
 
@@ -154,9 +152,8 @@ else if(isset($_REQUEST['name'])){
 
    $file = $_FILES['pic']; 
    $fileContent = file_get_contents($file['tmp_name']);
-
+//this rotation stuff fixes iphone pictures because they always upload screwed up.
    if(isset($rotation)) {
-       
       $fileContent = imagecreatefromstring($fileContent);
       switch($rotation) {
      
@@ -175,7 +172,7 @@ else if(isset($_REQUEST['name'])){
    else {
       $test = fopen("../pic/".$record.".".$ext,"x");
       if(!$test) {
-         echo "couldnt open";
+         echo json_encode("couldnt open");
          exit;
       }
       fwrite($test, $fileContent);
@@ -203,7 +200,7 @@ else if(isset($_REQUEST['namereg'])){
    
 
    if($stmt1->num_rows > 0) {
-      echo json_encode("error");
+      echo json_encode("error name already exists");
       exit;
    }
    else {

@@ -6,7 +6,10 @@ so its probably a little messy. my bad.
 
 basic structure of this web app- view.* files handles the map stuff(creating the map, getting data out of the database,
 displaying the data on the map) report.* files handles actually creating/validating the report, and sending it to the server
-the register.html file is just an extra page to register a name + team id into the db. testing files have a "test" prefix 
+the register.html file is just an extra page to register a name + team id into the db. 
+
+testing files are in the tests directory, with subdirectories for js/php tests. The js tests im probably not going to finish, but the php tests should be kind of done
+run those tests with "phpunit <test name here>". I should have php tests for report.php and view.php.  
 
 if you got any questions, email me dvo03@calpoly.edu. I'll answer any questions :D
 
@@ -27,7 +30,7 @@ Bootstrap for some of the login pages ux
 Mysql for database
 
 Testing:
-PHPunit with GUzzle to simulate post stuff
+PHPunit with GUzzle to simulate post stuff (to run test go to tests/php and run "phpunit test_____"
 QUNIT
 
 
@@ -35,7 +38,7 @@ QUNIT
 (if you're using the snapshots off of AWS you don't have to worry, but these are some extra settings that are required for 
 this thing to work)
 
-if you have to rebuild the mysql database schema, hopefully i left some files regarding the database schema. otherwise go look in the php files. 
+if you have to rebuild the mysql database schema, i left a file in the root directory 
 
 dont forget to adjust the php.ini (if using php) so that bigger files can be POSTed (aka the videos).
 
@@ -55,7 +58,6 @@ Possbile project extensions:
 So if you got this project, most likely something broke (most likely the meta data extraction is broken)
 
 After you finish fixing (or if somehow everything is still working) here are some projects i recommend:
-1. rewriting all the php server scripts to python. or just making the php scripts better. 
 
 2. creating an iphone/android app for the reporting in order to create some kind of offline mode that can save all the reports offline and can flushes all the reports 
 when theres cell/wifi signal
@@ -63,7 +65,7 @@ when theres cell/wifi signal
 3. migrate the entire thing to amazon web services. I think you could literally have this app live entirely off of amazon 
 (dynamoDB + the beanstalk or something???) instead of running off an ec2 instance. 
 
-4. rewrite the program into some kind of framework (angularJS, react, etc...) instead of just straight up using jquery
+4. rewrite the program into some kind of framework (angularJS, react, etc...) instead of just straight up using jquery. I suggest angular for frontend and Django for backend
 
 5. Security- This program has minimal security for its login system. At most I have really shitty php session stuff/cookies to handle logins, 
 https, hashed passwords, and prepared statements for the mysql quieries. THe really shitty part is the sessions/cookies. 
